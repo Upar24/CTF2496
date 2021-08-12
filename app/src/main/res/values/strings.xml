@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">CTF</string>
+    <string name="home_screen_route">Home</string>
+    <string name="party_screen_route">Party</string>
+    <string name="add_screen_route">Add</string>
+    <string name="trading_screen_route">Trading</string>
+    <string name="profile_screen_route">Profile</string>
+    <string name="title">CTForever</string>
+    <string name="search_screen_route">Search</string>
+    <string name="list_screen_route">List</string>
+    <string name="myprofile_screen_route">My Profile</string>
+    <string name="calculation_screen_route">Calculation</string>
+    <string name="tipstricks_screen_route">Tips &amp; Tricks</string>
+    <string name="dictionary_screen_route">Dictionary</string>
+    <string name="support_screen_route">Support</string>
+    <string name="otherprofile_screen_route">OtherProfile</string>
+</resources>
