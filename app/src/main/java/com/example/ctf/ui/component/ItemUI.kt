@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +30,53 @@ import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.home.HomeViewModel
 import com.example.ctf.ui.profile.ProfileViewModel
 import com.example.ctf.util.Status
+import com.example.ctf.util.listString
+
+import com.example.ctf.util.listString.T10L1
+import com.example.ctf.util.listString.T10L2
+import com.example.ctf.util.listString.T10L3
+import com.example.ctf.util.listString.T10L4
+import com.example.ctf.util.listString.T11L1
+import com.example.ctf.util.listString.T11L2
+import com.example.ctf.util.listString.T11L3
+import com.example.ctf.util.listString.T11L4
+import com.example.ctf.util.listString.T1L1
+import com.example.ctf.util.listString.T1L2
+import com.example.ctf.util.listString.T1L3
+import com.example.ctf.util.listString.T1L4
+import com.example.ctf.util.listString.T2L1
+import com.example.ctf.util.listString.T2L2
+import com.example.ctf.util.listString.T2L3
+import com.example.ctf.util.listString.T2L4
+import com.example.ctf.util.listString.T3L1
+import com.example.ctf.util.listString.T3L2
+import com.example.ctf.util.listString.T3L3
+import com.example.ctf.util.listString.T3L4
+import com.example.ctf.util.listString.T4L1
+import com.example.ctf.util.listString.T4L2
+import com.example.ctf.util.listString.T4L3
+import com.example.ctf.util.listString.T4L4
+import com.example.ctf.util.listString.T5L1
+import com.example.ctf.util.listString.T5L2
+import com.example.ctf.util.listString.T5L3
+import com.example.ctf.util.listString.T5L4
+import com.example.ctf.util.listString.T6L1
+import com.example.ctf.util.listString.T6L2
+import com.example.ctf.util.listString.T6L3
+import com.example.ctf.util.listString.T6L4
+import com.example.ctf.util.listString.T7L1
+import com.example.ctf.util.listString.T7L2
+import com.example.ctf.util.listString.T7L3
+import com.example.ctf.util.listString.T7L4
+import com.example.ctf.util.listString.T8L1
+import com.example.ctf.util.listString.T8L2
+import com.example.ctf.util.listString.T8L3
+import com.example.ctf.util.listString.T8L4
+import com.example.ctf.util.listString.T9L1
+import com.example.ctf.util.listString.T9L2
+import com.example.ctf.util.listString.T9L3
+import com.example.ctf.util.listString.T9L4
+import com.example.ctf.util.listString.nope
 
 
 @Composable
@@ -784,4 +832,57 @@ fun SearchRefreshItem(desc: String,state: TextFieldState=remember{ TextFieldStat
         )
 
     }
+}
+
+@Composable
+fun DropDownListItem(
+    desc:String,
+    state: TextFieldState = remember {TextFieldState()}
+){
+    val countryList= listOf(nope,
+        T1L1, T1L2, T1L3, T1L4,
+        T2L1, T2L2, T2L3, T2L4,
+        T3L1, T3L2, T3L3, T3L4,
+        T4L1, T4L2, T4L3, T4L4,
+        T5L1, T5L2, T5L3, T5L4,
+        T6L1, T6L2, T6L3, T6L4,
+        T7L1, T7L2, T7L3, T7L4,
+        T8L1, T8L2, T8L3, T8L4,
+        T9L1, T9L2, T9L3, T9L4,
+        T10L1, T10L2, T10L3, T10L4,
+        T11L1, T11L2, T11L3, T11L4
+    )
+    val isOpen= remember{ mutableStateOf(false)}
+    val openCloseOfDropDownList:(Boolean) -> Unit = {isOpen.value = it}
+    val userSelectedString:(String) -> Unit = {state.text = it}
+    Box{
+        Column (horizontalAlignment = Alignment.CenterHorizontally){
+            TextFieldOutlined(desc = desc,state)
+            DropdownMenu(
+                modifier= Modifier.fillMaxHeight(0.6f).align(CenterHorizontally),
+                expanded = isOpen.value,
+                onDismissRequest = { openCloseOfDropDownList(false) }
+            ) {
+                countryList.forEach {
+                    DropdownMenuItem(
+                        onClick = {
+                            openCloseOfDropDownList(false)
+                            userSelectedString(it)
+                        }) {
+                        Text(it)
+                    }
+                }
+            }
+        }
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Transparent)
+                .padding(10.dp)
+                .clickable(
+                    onClick = { isOpen.value = true }
+                )
+        )
+    }
+
 }

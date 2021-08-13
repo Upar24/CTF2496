@@ -1,8 +1,9 @@
 package com.example.ctf.data.local.entities
 
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*
-
+@Entity(tableName="chat")
 data class Chat(
     val username: String?="",
     val name:String?="",
