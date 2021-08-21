@@ -12,25 +12,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.ctf.data.local.entities.Trading
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
 import com.example.ctf.util.Status
+import com.example.ctf.util.listString
 import com.example.ctf.util.listString.all
 import com.example.ctf.util.listString.buying
 import com.example.ctf.util.listString.search
 import com.example.ctf.util.listString.selling
+import com.example.ctf.util.listString.title
 
 @Composable
-fun AddScreen(){
+fun AddScreen(navController: NavHostController){
     Column(
         Modifier
             .fillMaxSize()
-            .padding(start = 3.dp, end = 3.dp, top = 3.dp, bottom = 60.dp)
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp),
+        verticalArrangement = Arrangement.Top,horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AddTradingDialog(Trading("","","","","","","","",""))
         val addVM = hiltViewModel<AddViewModel>()
@@ -39,6 +44,7 @@ fun AddScreen(){
         var visibleScreen by remember { mutableStateOf(buying) }
         val queryState = remember { TextFieldState() }
         val allTradingList = mutableListOf<Trading>()
+        val titleTradingList = mutableListOf<Trading>()
         val buyingTradingList = mutableListOf<Trading>()
         val sellingTradingList = mutableListOf<Trading>()
         var trading by remember{mutableStateOf(Trading("","",""))}
@@ -47,10 +53,7 @@ fun AddScreen(){
             val result = it.peekContent()
             when(result.status){
                 Status.SUCCESS -> {}
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,result.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> {}
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -61,10 +64,7 @@ fun AddScreen(){
             val result= it.peekContent()
             when(result.status){
                 Status.SUCCESS -> {}
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,result.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> { }
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -74,14 +74,11 @@ fun AddScreen(){
         tradingState.value?.let {
             when(it.status){
                 Status.SUCCESS -> {
-                    it.data?.let {
-                        trading = it
+                    it.data?.let {trading1->
+                        trading = trading1
                     }
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,it.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> { }
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -91,21 +88,37 @@ fun AddScreen(){
         allTradingState.value?.let {
             when(it.status){
                 Status.SUCCESS -> {
-                    it.data?.let {
+                    it.data?.let {listTrading->
                         allTradingList.clear()
+                        titleTradingList.clear()
                         buyingTradingList.clear()
                         sellingTradingList.clear()
-                        it.forEach { trading ->
+                        listTrading.forEach { trading ->
                             allTradingList.add(trading)
+                            titleTradingList.add(trading)
                             buyingTradingList.add(trading)
                             sellingTradingList.add(trading)
                         }
                     }
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,it.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> {  }
+                Status.LOADING -> {
+                    ProgressCardToastItem()
+                }
+            }
+        }
+        val titleSearchState= addVM.titleSearchStatus.observeAsState()
+        titleSearchState.value?.let {
+            when(it.status){
+                Status.SUCCESS -> {
+                    it.data?.let {listTrading->
+                        titleTradingList.clear()
+                        listTrading.forEach {trading ->
+                            titleTradingList.add(trading)
+                        }
+                    }
+                }
+                Status.ERROR -> { }
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -115,17 +128,14 @@ fun AddScreen(){
         buyingSearchState.value?.let {
             when(it.status){
                 Status.SUCCESS -> {
-                    it.data?.let {
+                    it.data?.let {listTrading->
                         buyingTradingList.clear()
-                        it.forEach {trading ->
+                        listTrading.forEach {trading ->
                             buyingTradingList.add(trading)
                         }
                     }
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,it.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> { }
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -135,25 +145,26 @@ fun AddScreen(){
         sellingSearchState.value?.let {
             when(it.status){
                 Status.SUCCESS -> {
-                    it.data?.let {
+                    it.data?.let {listTrading->
                         sellingTradingList.clear()
-                        it.forEach { trading ->
+                        listTrading.forEach { trading ->
                             sellingTradingList.add(trading)
                         }
                     }
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,it.message ?: "An unknown error occured",
-                        Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> { }
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
             }
         }
         TextFieldOutlined(desc = search,queryState)
+        Spacer(modifier = Modifier.padding(6.dp))
         Row (Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly){
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        )
+        {
             ButtonClickItem(
                 desc = buying, onClick = {
                     visibleScreen = buying
@@ -162,13 +173,23 @@ fun AddScreen(){
                     else{
                         addVM.getBuyingSearch(queryState.text)
                     }
-                }
+                },warna=if(visibleScreen== buying)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
             )
             ButtonClickItem(
                 desc = all, onClick = {
                     visibleScreen = all
                     addVM.getAllTrading()
-                }
+                },warna=if(visibleScreen== all)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+            )
+            ButtonClickItem(
+                desc = title, onClick = {
+                    visibleScreen = title
+                    if(queryState.text.isEmpty()){
+                        addVM.getAllTrading()
+                    }
+                    else{
+                        addVM.getTitleSearch(queryState.text) }
+                },warna=if(visibleScreen== title)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
             )
             ButtonClickItem(
                 desc =selling, onClick = {
@@ -178,12 +199,14 @@ fun AddScreen(){
                     }
                     else{
                         addVM.getSellingSearch(queryState.text) }
-                }
+                },warna=if(visibleScreen== selling)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
             )
         }
+        DividerItem()
         val listDisplay:MutableList<Trading> = when (visibleScreen){
             buying -> buyingTradingList
             selling -> sellingTradingList
+            title -> titleTradingList
             else -> allTradingList
         }
         Column (
@@ -207,9 +230,10 @@ fun AddScreen(){
                             authVM.isLoggedIn()
                             authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
                             addVM.deleteTrading(trading1)
-                        }
+                        },navController
                     )
                 }
+                Spacer(modifier = Modifier.padding(3.dp))
             }
         }
 

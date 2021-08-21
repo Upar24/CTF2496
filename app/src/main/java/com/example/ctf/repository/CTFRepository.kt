@@ -9,6 +9,7 @@ import com.example.ctf.data.remote.requests.OneRequest
 import com.example.ctf.data.remote.requests.UpdateUserRequest
 import com.example.ctf.util.Resource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -211,6 +212,18 @@ class CTFRepository @Inject constructor(
             Resource.error("Couldnt connect to the server",null)
         }
     }
+    suspend fun getTitleSearch(query: String)= withContext(Dispatchers.IO){
+        try {
+            val response=ctfApi.getTitleSearch(OneRequest(query))
+            if(response.isSuccessful){
+                Resource.success(response.body())
+            }else{
+                Resource.error(response.message(),null)
+            }
+        }catch (e:Exception){
+            Resource.error("Couldnt connect to the server",null)
+        }
+    }
     suspend fun saveParty(party: Party)= withContext(Dispatchers.IO){
         try {
             val response=ctfApi.saveParty( party)
@@ -342,4 +355,29 @@ class CTFRepository @Inject constructor(
             Resource.error("Couldnt connect to the server",null)
         }
     }
+    suspend fun getListUserClub(club:String)= withContext(Dispatchers.IO){
+        try {
+            val response=ctfApi.ListUserClub(OneRequest(club))
+            if(response.isSuccessful){
+                Resource.success(response.body())
+            }else{
+                Resource.error(response.message(),null)
+            }
+        }catch (e:Exception){
+            Resource.error("Couldnt connect to the server",null)
+        }
+    }
+    suspend fun getListUserIgn(ign:String)= withContext(Dispatchers.IO){
+        try {
+            val response=ctfApi.ListUserIgn(OneRequest(ign))
+            if(response.isSuccessful){
+                Resource.success(response.body())
+            }else{
+                Resource.error(response.message(),null)
+            }
+        }catch (e:Exception){
+            Resource.error("Couldnt connect to the server",null)
+        }
+    }
+
 }

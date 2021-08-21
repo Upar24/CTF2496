@@ -63,10 +63,9 @@ class TextFieldState(string: String=""){
     var text : String by mutableStateOf(string)
 }
 fun getTimePost(timePost:Long):String{
-    val startTime= timePost
     val endTime= System.currentTimeMillis()
-    val diff= (endTime - startTime)/1000
-    return diff.toString()
+    val diff= (endTime - timePost) / 1000
+    return if(diff >= 86400) "${diff/86400} day(s)" else if(diff >= 3600) "${diff/3600} hour(s)" else if(diff >= 60) "${diff/60} minute(s)" else "${diff} second(s)"
 }
 @Composable
 fun getUsernameLoginFunction():String{
@@ -112,12 +111,10 @@ fun hoppingValueFunction(init:Long,limit:Long,request:String):String{
     return if(request =="A") "$hoppingTimes" else if(request=="B") "$interest" else "$initValue"
 }
 fun upgradeFunction(current:Long,drop:Long,hire:Long):String{
-    val dropStat=drop
-    val hireStat= hire
-    return (current - dropStat + hireStat).toString()
+    return (current - drop + hire).toString()
 }
 fun valueOfTheTier(tier:String):Long {
-    var value: Long =0
+    val value: Long
     when(tier){
         nope -> value= 0
         T1L1 -> value= 14
@@ -170,5 +167,5 @@ fun valueOfTheTier(tier:String):Long {
     return value
 }
 fun tsmaxplunder(tsValue:Long,request: String):String{
-    return if(request== ts) "${tsValue * 6}" else "${tsValue * 0.5}"
+    return if(request== ts) "${tsValue * 6}" else "${(tsValue * 0.5).roundToLong()}"
 }

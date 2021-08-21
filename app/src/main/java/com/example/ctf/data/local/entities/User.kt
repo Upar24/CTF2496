@@ -10,7 +10,5 @@ data class User (
     var clubName:String?="",
     var ign:String?="",
     var bio:String?="",
-    var createdAt:Long,
-    var lastActive:Long,
     val _id:String= UUID.randomUUID().toString()
 )

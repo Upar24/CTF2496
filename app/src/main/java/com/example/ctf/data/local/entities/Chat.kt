@@ -6,7 +6,7 @@ import java.util.*
 @Entity(tableName="chat")
 data class Chat(
     val username: String?="",
-    val name:String?="",
+    val ign:String?="",
     val clubName:String?="",
     var chat:String?="",
     val type:String?=null,
@@ -16,7 +16,7 @@ data class Chat(
 )
 data class Wall(
     val username: String? ="",
-    val name:String?="",
+    val ign:String?="",
     val clubName:String?="",
     val wallOwner:String?="",
     var chat:String?="",

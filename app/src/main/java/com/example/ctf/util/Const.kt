@@ -15,5 +15,5 @@ object Constants{
     const val TIMERKEYPREF= "TIMERKEYPREF"
     const val NOTIMER = "0"
     const val ENCRYPTED_SHARED_PREF_NAME = "enc_shared_pref"
-    val IGNORE_AUTH_URLS = listOf("/login","/register","/getuser")
+    val IGNORE_AUTH_URLS = listOf("/login","/register","/getuser","/getwall","/getchat","/getalltrading",)
 }

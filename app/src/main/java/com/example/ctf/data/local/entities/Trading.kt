@@ -7,7 +7,7 @@ import java.util.*
 data class Trading(
     val username:String?="",
     val name:String?="",
-    val clubName:String?="",
+    val ign:String?="",
     val title:String?="",
     val desc:String?="",
     val itemBuying:String?="",

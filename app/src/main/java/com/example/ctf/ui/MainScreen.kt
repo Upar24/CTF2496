@@ -2,12 +2,17 @@ package com.example.ctf.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -24,27 +29,33 @@ import com.example.ctf.ui.auth.RegisterScreen
 import com.example.ctf.ui.component.CTFAppBottomNavigation
 import com.example.ctf.ui.component.CTFAppDrawerNavigation
 import com.example.ctf.ui.component.CTFAppTopNavigation
+import com.example.ctf.ui.component.getUsernameLoginFunction
 import com.example.ctf.ui.home.CalculationScreen
 import com.example.ctf.ui.home.HomeScreen
 import com.example.ctf.ui.home.PartyScreen
 import com.example.ctf.ui.profile.OtherProfileScreen
 import com.example.ctf.ui.profile.ProfileScreen
+import com.example.ctf.ui.profile.ProfileViewModel
 import kotlinx.coroutines.launch
-
-sealed class BottomNavigationScreens(
+sealed class DrawerNavigationScreens(
     val route:String,
     @StringRes val resourceId:Int,
     val icon: Int
 ){
-    object Home:BottomNavigationScreens("Home", R.string.home_screen_route, R.drawable.home)
-    object Add:BottomNavigationScreens("Add",R.string.add_screen_route, R.drawable.add)
-    object Profile:BottomNavigationScreens("Profile",R.string.profile_screen_route, R.drawable.profile)
-    object Search:BottomNavigationScreens("Search",R.string.search_screen_route, R.drawable.search)
-    object MyProfile:BottomNavigationScreens("MyProfile",R.string.myprofile_screen_route, R.drawable.profile)
-    object TipsTricks:BottomNavigationScreens("TipsTricks",R.string.tipstricks_screen_route, R.drawable.lamp)
-    object Dictionary:BottomNavigationScreens("Dictionary",R.string.dictionary_screen_route, R.drawable.kamus)
-    object Support:BottomNavigationScreens("Support",R.string.support_screen_route, R.drawable.support)
-    object OtherProfile:BottomNavigationScreens("OtherProfile",R.string.otherprofile_screen_route, R.drawable.support)
+    object TipsTricks:DrawerNavigationScreens("TipsTricks",R.string.tipstricks_screen_route, R.drawable.lamp)
+    object Dictionary:DrawerNavigationScreens("Dictionary",R.string.dictionary_screen_route, R.drawable.kamus)
+    object Support:DrawerNavigationScreens("Support",R.string.support_screen_route, R.drawable.support)
+}
+sealed class BottomNavigationScreens(
+    val route:String,
+    @StringRes val resourceId:Int,
+    val icon: ImageVector
+){
+    object Home:BottomNavigationScreens("Home", R.string.home_screen_route, Icons.Filled.Home )
+    object Add:BottomNavigationScreens("Add",R.string.add_screen_route, Icons.Filled.AddCircleOutline)
+    object Profile:BottomNavigationScreens("Profile",R.string.profile_screen_route, Icons.Filled.Person)
+    object Search:BottomNavigationScreens("Search",R.string.search_screen_route, Icons.Filled.Search)
+    object OtherProfile:BottomNavigationScreens("OtherProfile",R.string.otherprofile_screen_route, Icons.Filled.AddCircleOutline)
     fun withArgs(vararg args: String):String{
         return buildString {
             append(route)
@@ -62,8 +73,7 @@ fun MainScreen(){
     ) {
         Card(
             modifier = Modifier
-                .fillMaxSize(1f)
-                .padding(start = 3.dp, top = 2.dp, end = 3.dp, bottom = 2.dp),
+                .fillMaxSize(1f),
             shape= RoundedCornerShape(8.dp),
             backgroundColor = MaterialTheme.colors.background){
             val navController: NavHostController = rememberNavController()
@@ -72,13 +82,13 @@ fun MainScreen(){
             val bottomNavigationItems= listOf(
                 BottomNavigationScreens.Home,
                 BottomNavigationScreens.Add,
+                BottomNavigationScreens.Search,
                 BottomNavigationScreens.Profile
             )
             val drawerNavigationItems= listOf(
-                BottomNavigationScreens.MyProfile,
-                BottomNavigationScreens.TipsTricks,
-                BottomNavigationScreens.Dictionary,
-                BottomNavigationScreens.Support
+                DrawerNavigationScreens.TipsTricks,
+                DrawerNavigationScreens.Dictionary,
+                DrawerNavigationScreens.Support
             )
             val authVM = hiltViewModel<AuthViewModel>()
 
@@ -121,7 +131,7 @@ fun MainScreenNavigationConfiguration(
 ){
     NavHost(navController, startDestination = BottomNavigationScreens.Home.route){
         composable(BottomNavigationScreens.Home.route){
-            HomeScreen()
+            HomeScreen(navController)
         }
         composable("Party"){
             PartyScreen()
@@ -133,24 +143,27 @@ fun MainScreenNavigationConfiguration(
                 nullable=true
             }
         )){
-            it.arguments?.getString("username")?.let { it1 -> OtherProfileScreen(it1,navController) }
+
+            val profileVM = hiltViewModel<ProfileViewModel>()
+            it.arguments?.getString("username")?.let { it1 ->
+                profileVM.getWall(it1)
+                OtherProfileScreen(it1,navController) }
         }
         composable(BottomNavigationScreens.Add.route){
-            AddScreen()
+            AddScreen(navController)
         }
         composable(BottomNavigationScreens.Profile.route){
+            val profileVM = hiltViewModel<ProfileViewModel>()
+            profileVM.getWall(getUsernameLoginFunction())
             ProfileScreen(navController)
         }
         composable(BottomNavigationScreens.Search.route){
-            SearchScreen()
-        }
-        composable(BottomNavigationScreens.MyProfile.route){
-            MyProfileScreen()
+            SearchScreen(navController)
         }
         composable("Calculate"){
             CalculationScreen()
         }
-        composable(BottomNavigationScreens.TipsTricks.route){
+        composable(DrawerNavigationScreens.TipsTricks.route){
             TipsTricksScreen()
         }
         composable("Dictionary"){

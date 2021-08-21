@@ -1,5 +1,7 @@
 package com.example.ctf.ui.home
 
+import android.widget.Space
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -9,8 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.ctf.R
 import com.example.ctf.ui.component.*
 import com.example.ctf.util.listString.dvp
 import com.example.ctf.util.listString.init
@@ -22,13 +27,17 @@ import com.example.ctf.util.listString.result
 import com.example.ctf.util.listString.ts
 import com.example.ctf.util.listString.upgrade
 import com.example.ctf.util.listString.volley
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun CalculationScreen() {
     val listCalc = listOf(dvp, upgrade, ts, maxplunder)
     var visibleCalc by remember { mutableStateOf(dvp) }
-    Column(Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center) {
-
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp),verticalArrangement = Arrangement.Center) {
         var tabIndex by remember { mutableStateOf(0) }
 
         ScrollableTabRow(
@@ -43,8 +52,8 @@ fun CalculationScreen() {
                     Text(
                         text, Modifier
                             .padding(6.dp),
-                        style = if (visibleCalc == text) MaterialTheme.typography.button else MaterialTheme.typography.body1,
-                        color = if (visibleCalc == text) Color.Magenta else MaterialTheme.colors.onBackground
+                        style = if (visibleCalc == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
+                        color = if (visibleCalc == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
                     )
                 })
             }
@@ -61,54 +70,103 @@ fun CalculationScreen() {
 }
 @Composable
 fun DvpDisplay(){
-    Column(Modifier.fillMaxWidth()){
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally){
+        var visibleDvp by remember { mutableStateOf("") }
         var textString by remember { mutableStateOf("")}
         val initState = remember { TextFieldState("0") }
         val limitState = remember { TextFieldState("0") }
+        Spacer(Modifier.padding(6.dp))
         EditTextItem(desc = init,state =initState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
+        Spacer(Modifier.padding(3.dp))
         EditTextItem(desc = limit,state =limitState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        Row(Modifier.fillMaxWidth()){
-            ButtonClickItem(desc = volley, onClick = {textString=hoppingValueFunction(initState.text.toLong(),limitState.text.toLong(),"A")})
-            ButtonClickItem(desc = interest, onClick = {textString=hoppingValueFunction(initState.text.toLong(),limitState.text.toLong(),"B")})
-            ButtonClickItem(desc = result, onClick = {textString=hoppingValueFunction(initState.text.toLong(),limitState.text.toLong(),"C")})
+        Spacer(Modifier.padding(6.dp))
+        Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceAround,verticalAlignment = Alignment.CenterVertically){
+            ButtonClickItem(
+                desc = volley,
+                onClick = {
+                visibleDvp= volley
+                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"A")},
+                warna=if(visibleDvp==volley)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+            )
+            ButtonClickItem(
+                desc = interest,
+                onClick = {
+                visibleDvp= interest
+                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"B")},
+                warna=if(visibleDvp==interest)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+            )
+            ButtonClickItem(
+                desc = result,
+                onClick = {
+                visibleDvp= result
+                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"C")},
+                warna=if(visibleDvp==result)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+            )
         }
-        Text(textString)
+        Spacer(modifier = Modifier.padding(6.dp))
+        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
+        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
+
     }
 }
 @Composable
 fun UpgradeDisplay(){
-    Column(Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
         val currentStatusState = remember { TextFieldState("0") }
         val dropDormState = remember { TextFieldState(nope) }
         val hireDormState = remember { TextFieldState(nope) }
 
+        Spacer(modifier = Modifier.padding(6.dp))
         EditTextItem(desc = "Current Status",state = currentStatusState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
         DropDownListItem(desc = "Drop a dormmate?",dropDormState)
         DropDownListItem(desc = "Hiring a dormmate?",hireDormState)
-        ButtonClickItem(desc = "Calculate", onClick = { textString= upgradeFunction(currentStatusState.text.toLong(),
+        Spacer(modifier = Modifier.padding(6.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= upgradeFunction(currentStatusState.text.filter { it.isLetterOrDigit()}.toLong(),
             valueOfTheTier(dropDormState.text), valueOfTheTier(hireDormState.text)) })
-        Text(textString)
+        Spacer(modifier = Modifier.padding(6.dp))
+        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
+        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
     }
 }
 @Composable
 fun TSDisplay(){
-    Column {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
         val tsStatus = remember { TextFieldState("0") }
+        Spacer(modifier = Modifier.padding(6.dp))
         EditTextItem(desc = "Current Status",state = tsStatus,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(tsStatus.text.toLong(),ts) })
-        Text(textString)
+        Spacer(modifier = Modifier.padding(6.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(tsStatus.text.filter { it.isLetterOrDigit()}.toLong(),ts) })
+        Spacer(modifier = Modifier.padding(6.dp))
+        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
+        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
     }
 }
 @Composable
 fun MaxPlunderDisplay(){
-    Column {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
         val statusState = remember { TextFieldState("0") }
+        Spacer(modifier = Modifier.padding(6.dp))
         EditTextItem(desc = "Current Status",state = statusState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(statusState.text.toLong(),
+        Spacer(modifier = Modifier.padding(6.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(statusState.text.filter { it.isLetterOrDigit()}.toLong(),
             maxplunder) })
-        Text(textString)
+        Spacer(modifier = Modifier.padding(6.dp))
+        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
+        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
     }
 }

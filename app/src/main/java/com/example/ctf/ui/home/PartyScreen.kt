@@ -1,5 +1,4 @@
 package com.example.ctf.ui.home
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +10,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -31,11 +29,11 @@ import com.example.ctf.util.listString.dropped
 import com.example.ctf.util.listString.hpstr
 import com.example.ctf.util.listString.hpstr7
 import com.example.ctf.util.listString.nope
+import com.example.ctf.util.listString.reguler
 import com.example.ctf.util.listString.thebc
 import com.example.ctf.util.listString.thebc7
 import com.example.ctf.util.listString.vipp
 import com.example.ctf.util.listString.vipp7
-import kotlinx.coroutines.NonDisposableHandle.parent
 
 @Composable
 fun PartyScreen() {
@@ -66,18 +64,8 @@ fun PartyScreen() {
     savePartyState.value?.let {
         val result= it.peekContent()
         when (result.status) {
-            Status.SUCCESS -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "Party saved",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.SUCCESS -> {}
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -118,12 +106,7 @@ fun PartyScreen() {
                     allList.add(party)
                 }
             }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, it.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -133,18 +116,8 @@ fun PartyScreen() {
     saveDropState.value?.let {
         val result = it.peekContent()
         when (result.status) {
-            Status.SUCCESS -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "Drop party saved",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.SUCCESS -> {}
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -155,19 +128,14 @@ fun PartyScreen() {
         when (it.status) {
             Status.SUCCESS -> {
                 it.data?.forEach {dropped ->
-                    if(dropped.role == "reguler"){
+                    if(dropped.role == reguler){
                         regulerDropList.add(dropped)
                     }else{
                         ultraDropList.add(dropped)
                     }
                 }
             }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, it.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -177,18 +145,8 @@ fun PartyScreen() {
     saveTodayState.value?.let {
         val result= it.peekContent()
         when (result.status) {
-            Status.SUCCESS -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "Today saved",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.SUCCESS -> {}
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -200,12 +158,7 @@ fun PartyScreen() {
             Status.SUCCESS -> {
                 today = it.data ?: return@let
             }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, it.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
@@ -215,26 +168,16 @@ fun PartyScreen() {
     deleteDropState.value?.let {
         val result =it.peekContent()
         when (result.status) {
-            Status.SUCCESS -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "Drop party deleted",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            Status.ERROR -> {
-                Toast.makeText(
-                    LocalContext.current, result.message ?: "An unknown error occured",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Status.SUCCESS -> {}
+            Status.ERROR -> {}
             Status.LOADING -> {
                 ProgressCardToastItem()
             }
         }
     }
-    Column(Modifier.padding(start = 3.dp, end = 3.dp)) {
-        if (saveTodayDialog) SaveTodayDialog(today)
-        if (saveDropDialog) SaveDropDialog()
+    Column(Modifier.padding(4.dp)) {
+        if (saveTodayDialog) SaveTodayDialog(today,onClick={saveTodayDialog = !saveTodayDialog})
+        if (saveDropDialog) SaveDropDialog(onClick={saveDropDialog=!saveDropDialog})
         if (savePartyDialog) SavePartyDialog(Party(role= visibleParty,"","",NA))
         if (userListDialog) ObserveUserList({userListDialog= !userListDialog})
         ConstraintLayout(
@@ -246,7 +189,7 @@ fun PartyScreen() {
 
             Spacer(
                 modifier = Modifier
-                    .padding(start = 5.dp)
+                    .padding(2.dp)
                     .constrainAs(spacerText) {
                         centerVerticallyTo(regulerText)
                         centerHorizontallyTo(parent)
@@ -257,6 +200,7 @@ fun PartyScreen() {
                 "Today Reguler: ${today.reguler}",
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier
+                    .padding(bottom = 6.dp)
                     .constrainAs(regulerText) {
                         start.linkTo(parent.start)
                         bottom.linkTo(listReguler.top)
@@ -267,6 +211,7 @@ fun PartyScreen() {
                 "Today Ultra: ${today.ultra}",
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier
+                    .padding(bottom = 6.dp)
                     .constrainAs(ultraText) {
                         start.linkTo(spacerText.end)
                         bottom.linkTo(listUltra.top)
@@ -301,7 +246,7 @@ fun PartyScreen() {
                 }
             }
         }
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.padding(2.dp))
         var tabIndex by remember { mutableStateOf(0) }
         ScrollableTabRow(
             selectedTabIndex = tabIndex, modifier = Modifier.fillMaxWidth(),
@@ -317,8 +262,8 @@ fun PartyScreen() {
                         text,
                         modifier = Modifier
                             .padding(6.dp),
-                        style = if (visibleParty == text) MaterialTheme.typography.button else MaterialTheme.typography.body1,
-                        color = if (visibleParty == text) Color.Magenta else colors.onBackground
+                        style = if (visibleParty == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
+                        color = if (visibleParty == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
                     )
                 })
             }
@@ -342,6 +287,7 @@ fun PartyScreen() {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp)
         ) {
 
             listDisplay.forEach { party->
@@ -357,7 +303,9 @@ fun PartyScreen() {
                         Modifier
                             .fillMaxWidth()
                             .clickable { editPartyDialog = !editPartyDialog }
-                            .padding(start = 6.dp, end = 6.dp, top = 3.dp, bottom = 3.dp)
+                            .padding(start = 6.dp, end = 6.dp, top = 3.dp, bottom = 3.dp),
+                        horizontalArrangement=Arrangement.SpaceBetween,
+                        verticalAlignment=Alignment.CenterVertically
                     ) {
                         val username = getUsernameLoginFunction()
                         GetAuthenticateFunction()
@@ -367,13 +315,14 @@ fun PartyScreen() {
                         val countChecked by remember{ mutableStateOf(party.check.size)}
                         val countNope by remember { mutableStateOf(party.nope.size)}
                         val countDropped by remember { mutableStateOf(party.drop.size)}
-                        val status by remember { mutableStateOf("lmao")}
+                        val status by remember { mutableStateOf("Status")}
                         Row(Modifier.fillMaxWidth(0.2f), Arrangement.Start) {
                             ProfileInfoItem(number = party.name, desc = party.duration)
                         }
                         Row(Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(party.status)
+                                Spacer(modifier = Modifier.padding(2.dp))
                                 Text(status)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -381,12 +330,14 @@ fun PartyScreen() {
                                     Text(countChecked.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.check)
                                             userListDialog = !userListDialog},Color.Yellow)
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Checked",Modifier.clickable {
                                         homeVM.toggleCheck(party)},Color.Yellow)
                                 }else{
                                     Text(countChecked.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.check)
                                             userListDialog = !userListDialog})
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Check",Modifier.clickable {
                                         homeVM.toggleCheck(party)
                                     })
@@ -397,12 +348,14 @@ fun PartyScreen() {
                                     Text(countNope.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.nope)
                                             userListDialog = !userListDialog},Color.Red)
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Nope",Modifier.clickable {
                                         homeVM.toggleNope(party)},Color.Red)
                                 }else{
                                     Text(countNope.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.nope)
                                             userListDialog = !userListDialog})
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Nope",Modifier.clickable {
                                         homeVM.toggleNope(party)},)
                                 }
@@ -414,22 +367,23 @@ fun PartyScreen() {
                                         Modifier
                                             .clickable{homeVM.getListUser(party.drop)
                                                 userListDialog = !userListDialog},Color.Green)
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Dropped",Modifier.clickable {
                                         homeVM.toggleDrop(party)},Color.Green)
                                 }else{
                                     Text(countDropped.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.drop)
                                             userListDialog = !userListDialog})
+                                    Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Drop",Modifier.clickable {
                                         homeVM.toggleDrop(party) },)
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.padding(3.dp))
                 }
+                Spacer(modifier = Modifier.padding(3.dp))
             }
-            ButtonClickItem(desc ="click", onClick = {homeVM.getPartyList()})
         }
     }
 }

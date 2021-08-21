@@ -1,5 +1,8 @@
 package com.example.ctf.ui.profile
 
+import android.app.Application
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +15,7 @@ import com.example.ctf.util.Event
 import com.example.ctf.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +32,11 @@ class ProfileViewModel @Inject constructor(
     val getWallStatus : LiveData<Resource<List<Wall>>> = _getWallStatus
     private val _deleteWallStatus = MutableLiveData<Event<Resource<String>>>()
     val deleteWallStatus : LiveData<Event<Resource<String>>> = _deleteWallStatus
+    private val _listUserClubStatus = MutableLiveData<Resource<List<User>>>()
+    val listUserClubStatus:LiveData<Resource<List<User>>> = _listUserClubStatus
+    private val _listUserIgnStatus = MutableLiveData<Resource<List<User>>>()
+    val listUserIgnStatus:LiveData<Resource<List<User>>> = _listUserIgnStatus
+
 
     fun getUser(username:String){
         _user.postValue(Resource.loading(null))
@@ -37,11 +46,12 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(updateUserReq: UpdateUserRequest){
+    fun updateProfile(updateUserReq: UpdateUserRequest,username:String){
         _updateProfile.postValue(Event(Resource.loading(null)))
         viewModelScope.launch {
             val result=repository.updateProfile(updateUserReq)
             _updateProfile.postValue(Event(result))
+            getUser(username)
         }
     }
 
@@ -61,11 +71,26 @@ class ProfileViewModel @Inject constructor(
             _getWallStatus.postValue(result)
         }
     }
-    fun deleteWall(wall:Wall){
+    fun deleteWall(username:String,wall:Wall){
         _deleteWallStatus.postValue(Event(Resource.loading(null)))
         viewModelScope.launch {
             val result=repository.deleteWall(wall)
             _deleteWallStatus.postValue(Event(result))
+            getWall(username)
+        }
+    }
+    fun listUserClub(club:String){
+        _listUserClubStatus.postValue(Resource.loading(null))
+        viewModelScope.launch {
+            val result = repository.getListUserClub(club)
+            _listUserClubStatus.postValue(result)
+        }
+    }
+    fun listUserIgn(ign:String){
+        _listUserIgnStatus.postValue(Resource.loading(null))
+        viewModelScope.launch {
+            val result = repository.getListUserIgn(ign)
+            _listUserIgnStatus.postValue(result)
         }
     }
 

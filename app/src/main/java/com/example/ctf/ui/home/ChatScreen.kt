@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.ctf.R
 import com.example.ctf.data.local.entities.Chat
 import com.example.ctf.ui.auth.AuthViewModel
@@ -33,11 +34,11 @@ import com.example.ctf.util.listString.unknownerrortoast
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChatScreen(){
+fun ChatScreen(navController:NavHostController){
     Column (
         Modifier
             .fillMaxSize()
-            .padding(6.dp),
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
 
@@ -60,11 +61,7 @@ fun ChatScreen(){
                 Status.SUCCESS ->{
                     authVM.sharedPref.edit().putString(Constants.TIMERKEYPREF,(System.currentTimeMillis() + 25000L ).toString()).apply()
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,result.message ?: unknownerrortoast, Toast.LENGTH_SHORT
-                    ).show()
-                }
+                Status.ERROR -> {}
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
@@ -91,18 +88,11 @@ fun ChatScreen(){
                         }
                     }
                 }
-                Status.ERROR -> {
-                    Toast.makeText(
-                        LocalContext.current,it.message ?: "An unknown error occured", Toast.LENGTH_SHORT
-                    ).show()
-                }
+                Status.ERROR -> {}
                 Status.LOADING -> {
                     ProgressCardToastItem()
                 }
             }
-        }
-        Button(onClick={} ){
-            Text("Click")
         }
         Card(
             border= BorderStroke(1.dp, MaterialTheme.colors.onSurface),
@@ -119,10 +109,10 @@ fun ChatScreen(){
                     },text= {
                         Text( text,
                             Modifier
-                                .padding(6.dp)
+                                .padding(2.dp)
                                 .clickable { visibleChat = text },
-                            style = if (visibleChat == text) MaterialTheme.typography.button else MaterialTheme.typography.body1,
-                            color = if (visibleChat == text) Color.Magenta else MaterialTheme.colors.onBackground
+                            style = if (visibleChat == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
+                            color = if (visibleChat == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
                         )
                     }
                     )
@@ -135,15 +125,18 @@ fun ChatScreen(){
             Column {
                 Row(
                     Modifier
-                        .fillMaxWidth(0.9f),
-                    horizontalArrangement = Arrangement.Center,
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(Modifier.weight(5f)) {
-                        EditTextItem(desc = visibleChat, state = typeState)
+                    Row(Modifier.weight(6f),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        TextFieldOutlined(desc = visibleChat, state = typeState)
                     }
-                    Row(Modifier.weight(2f)) {
-
+                    Row(Modifier.weight(2f),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically) {
                         ButtonClickItem(desc = send, onClick = {
                             if (authVM.timerLeft() <= 0) {
                                 authVM.isLoggedIn()
@@ -165,17 +158,17 @@ fun ChatScreen(){
                             }
                         })
                     }
-
-                    Spacer(Modifier.padding(3.dp))
-                    Row(Modifier.weight(1f)) {
+                    Row(Modifier.weight(0.8f),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically) {
                         ImageItemClick(
                             id = R.drawable.refresh,
                             onIconClick = { homeVM.getChat() })
-                    }
+                    } 
                 }
+                Spacer(modifier = Modifier.padding(3.dp))
                 DividerItem()
-                Text(text = visibleChat)
-                val listChatDisplay: MutableList<Chat> = when (visibleChat) {
+                val listChatDisplay: MutableList<Chat> = when (visibleChat){
                     lbhpost -> lbhpostList
                     lbhneeded -> lbhneededList
                     hotsale -> hotsaleList
@@ -186,7 +179,8 @@ fun ChatScreen(){
                         .verticalScroll(rememberScrollState())
                 ) {
                     listChatDisplay.forEach { chat ->
-                        ChatCard(chat = chat)
+                        ChatCard(chat = chat,navController)
+                        Spacer(modifier = Modifier.padding(3.dp))
                     }
                 }
             }

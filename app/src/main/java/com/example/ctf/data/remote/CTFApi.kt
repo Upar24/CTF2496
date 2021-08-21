@@ -90,6 +90,10 @@ interface CTFApi {
         @Body query:OneRequest
     ):Response<List<Trading>>
 
+    @POST("/gettitlesearch")
+    suspend fun getTitleSearch(
+        @Body query:OneRequest
+    ):Response<List<Trading>>
 
     @POST("/saveparty")
     suspend fun saveParty(
@@ -136,4 +140,16 @@ interface CTFApi {
     suspend fun getListUser(
         @Body listUsername: ListStringRequest
     ):Response<List<User>>
+
+    @POST("/getlistuserclub")
+    suspend fun ListUserClub(
+        @Body clubName:OneRequest
+    ):Response<List<User>>
+
+    @POST("/getlistuserign")
+    suspend fun ListUserIgn(
+        @Body ignName:OneRequest
+    ):Response<List<User>>
+
+
 }

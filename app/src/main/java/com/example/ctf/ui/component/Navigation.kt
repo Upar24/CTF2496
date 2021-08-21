@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.ctf.R
 import com.example.ctf.ui.BottomNavigationScreens
+import com.example.ctf.ui.DrawerNavigationScreens
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.theme.ThemeState
 import com.example.ctf.util.Constants.KEY_LOGGED_IN_PASSWORD
@@ -34,18 +34,13 @@ import com.example.ctf.util.listString.darkmodestring
 fun CTFAppTopNavigation(
     onIconClick: () -> Unit,
     navController: NavHostController
-){
+) {
     Row(
-        modifier= Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colors.onError)
-            .padding(start = 12.dp, end = 12.dp)
-            .height(45.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        Alignment.CenterVertically
+        Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        TopBarItem(onIconClick, modifier = Modifier)
-        ImageItemClick(id = R.drawable.search, onIconClick = { navigateRouteFunction(navController,"Search") })
+        TopBarItem(onIconClick)
     }
 }
 
@@ -55,7 +50,7 @@ fun CTFAppDrawerNavigation(
     modifier: Modifier = Modifier,
     closeDrawerAction: () -> Unit,
     navController: NavHostController,
-    items: List<BottomNavigationScreens>
+    items: List<DrawerNavigationScreens>
 ){
     Column(
         modifier= modifier
@@ -84,21 +79,21 @@ fun AppdrawerHeader(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val username= getUsernameLoginFunction()
-        TopBarItem(
-            closeDrawerAction,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
+        Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Start,verticalAlignment = Alignment.CenterVertically){
+            TopBarItem(
+                closeDrawerAction
+            )
+        }
         Spacer(modifier = Modifier.padding(12.dp))
-        Text(
-            text=username,
-            style=MaterialTheme.typography.subtitle2
-        )
+        Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center){
+            Text(
+                text=getUsernameLoginFunction(),
+                style=MaterialTheme.typography.subtitle2
+            )
+        }
     }
 }
 
@@ -106,7 +101,7 @@ fun AppdrawerHeader(
 fun AppdrawerBody(
     closeDrawerAction: () -> Unit,
     navController: NavHostController,
-    items: List<BottomNavigationScreens>
+    items: List<DrawerNavigationScreens>
 ) {
     items.forEach {item ->
         Row(
@@ -116,7 +111,8 @@ fun AppdrawerBody(
                 .clickable {
                     navigateRouteFunction(navController, item.route)
                     closeDrawerAction()
-                },
+                }
+                .height(27.dp),
             verticalAlignment = Alignment.CenterVertically
         ){
             Image(
@@ -171,22 +167,17 @@ fun AppdrawerFooter(
                 onCheckedChange = { ThemeState.darkModeState = it }
             )
         }
-        Button(
-            onClick = {
-                closeDrawerAction()
-                if (x == LOGIN) {
-                    navigateRouteFunction(navController, "LoginRoute")
-                    authVM.getDesc()
-                } else {
-                    authVM.sharedPref.edit().putString(KEY_LOGGED_IN_USERNAME, NO_USERNAME).apply()
-                    authVM.sharedPref.edit().putString(KEY_LOGGED_IN_PASSWORD, NO_PASSWORD).apply()
-                    navController.navigate("Home")
-                    authVM.getDesc()
-                }
-            }
-        ) {
-            Text(x)
-        }
+        ButtonClickItem(desc = x, onClick = {
+            closeDrawerAction()
+            if (x == LOGIN) {
+                navigateRouteFunction(navController, "LoginRoute")
+                authVM.getDesc()
+            } else {
+                authVM.sharedPref.edit().putString(KEY_LOGGED_IN_USERNAME, NO_USERNAME).apply()
+                authVM.sharedPref.edit().putString(KEY_LOGGED_IN_PASSWORD, NO_PASSWORD).apply()
+                navController.navigate("Home")
+                authVM.getDesc()
+            } })
     }
 }
 @Composable
@@ -194,17 +185,14 @@ fun CTFAppBottomNavigation(
     navController: NavHostController,
     items:List<BottomNavigationScreens>
 ){
-    BottomNavigation (backgroundColor=MaterialTheme.colors.onError){
+    BottomNavigation (backgroundColor=MaterialTheme.colors.background){
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute= navBackStackEntry?.destination?.route
         items.forEach{screen ->
             BottomNavigationItem(
-                icon= { Image(
-                    painterResource(id =screen.icon),
-                    contentDescription = screen.route,
-                    modifier = Modifier.height(36.dp)
-                )
-                },
+                icon= { Icon(imageVector = screen.icon, contentDescription = "",
+                    tint=MaterialTheme.colors.primaryVariant
+                )},
                 label={
                     Text(
                         stringResource(id = screen.resourceId),

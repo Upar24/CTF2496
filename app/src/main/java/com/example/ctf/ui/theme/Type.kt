@@ -55,7 +55,7 @@ val Typography = Typography(defaultFontFamily = Barlow,
     h5 =TextStyle(
         fontFamily = Barlow,
         fontWeight = FontWeight.W600,
-        fontSize = 26.sp,
+        fontSize = 24.sp,
         textAlign = TextAlign.Center
     ),
     h6 =TextStyle(
