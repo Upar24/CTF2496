@@ -4,11 +4,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.ctf.data.local.entities.Trading
 import com.example.ctf.repository.CTFRepository
 import com.example.ctf.util.Event
 import com.example.ctf.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +44,7 @@ class AddViewModel @Inject constructor(
         viewModelScope.launch {
             val result=repository.saveTrading(trading)
             _saveStatus.postValue(Event(result))
+            getAllTrading()
         }
     }
     fun deleteTrading(trading: Trading){

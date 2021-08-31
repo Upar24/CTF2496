@@ -120,6 +120,8 @@ interface CTFApi {
     suspend fun deleteDrop(
         @Body dropped: Dropped
     ):Response<SimpleResponse>
+    @GET("/deletedrop")
+    suspend fun deletion():Response<SimpleResponse>
 
     @POST("/togglecheck")
     suspend fun toggleCheck(

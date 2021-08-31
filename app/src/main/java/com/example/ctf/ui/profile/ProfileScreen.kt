@@ -1,5 +1,6 @@
 package com.example.ctf.ui.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,12 +13,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.ctf.R
 import com.example.ctf.data.local.entities.Trading
 import com.example.ctf.data.local.entities.User
 import com.example.ctf.data.local.entities.Wall
@@ -32,7 +32,6 @@ import com.example.ctf.util.listString.showless
 import com.example.ctf.util.listString.showmore
 import com.example.ctf.util.listString.wall
 import kotlinx.coroutines.launch
-
 @Composable
 fun ProfileScreen(navController: NavHostController) {
     Column(
@@ -42,13 +41,14 @@ fun ProfileScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        AdvertView()
         val authVM = hiltViewModel<AuthViewModel>()
         val profileVM = hiltViewModel<ProfileViewModel>()
         val addVM = hiltViewModel<AddViewModel>()
-        var user by remember { mutableStateOf(User("Fina", "", "", "", "", "",  "")) }
+        var user by remember { mutableStateOf(User("Fina", "", "", "", "", "Please check your connection.",  System.currentTimeMillis()-61000,"")) }
         GetAuthenticateFunction()
-        var wallList = listOf<Wall>()
-        var postList = listOf<Trading>()
+        val wallList = mutableListOf<Wall>()
+        val postList = mutableListOf<Trading>()
         var trading by remember { mutableStateOf(Trading("", "", "")) }
         val scaffoldState = rememberScaffoldState()
         val snackbarCoroutineScope = rememberCoroutineScope()
@@ -83,7 +83,12 @@ fun ProfileScreen(navController: NavHostController) {
         getWallState.value?.let {
             when (it.status) {
                 Status.SUCCESS -> {
-                    wallList = it.data ?: return@let
+                    it.data?.let { listWall ->
+                        wallList.clear()
+                        listWall.forEach { wall ->
+                            wallList.add(wall)
+                        }
+                    } ?: wallList.clear()
                 }
                 Status.ERROR -> { }
                 Status.LOADING -> {
@@ -95,7 +100,12 @@ fun ProfileScreen(navController: NavHostController) {
         allUserTradingState.value?.let {
             when (it.status) {
                 Status.SUCCESS -> {
-                    postList = it.data ?: return@let
+                    it.data?.let { listTrading ->
+                        postList.clear()
+                        listTrading.forEach { trading ->
+                            postList.add(trading)
+                        }
+                    } ?: postList.clear()
                 }
                 Status.ERROR -> { }
                 Status.LOADING -> {
@@ -114,6 +124,22 @@ fun ProfileScreen(navController: NavHostController) {
                 }
             }
         }
+        val deletionState= profileVM.deletionStatus.observeAsState()
+        deletionState.value?.let{
+            when(it.status){
+                Status.SUCCESS ->{
+                    Toast.makeText(
+                    LocalContext.current, "Success",
+                    Toast.LENGTH_SHORT).show()}
+                Status.ERROR -> {
+                    Toast.makeText(
+                    LocalContext.current, "Try again",
+                    Toast.LENGTH_SHORT).show()}
+                Status.LOADING -> {
+                    ProgressCardToastItem()
+                }
+            }
+        }
         val username= getUsernameLoginFunction()
         var seeMore by remember { mutableStateOf(false) }
         var visibleEdit by remember { mutableStateOf(false) }
@@ -122,44 +148,26 @@ fun ProfileScreen(navController: NavHostController) {
             EditProfileDialog(user = user,onClick={visibleEdit=!visibleEdit},username)
         }
         Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            Text(username)
-            Row(
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End
-            ) {
-                Text(if (!seeMore) showmore else showless,
-                    modifier = Modifier
-                        .height(36.dp)
-                        .clickable {
-                            if (seeMore) {
-                                seeMore = !seeMore
-                            } else {
-                                seeMore = !seeMore
-                                profileVM.getUser(username)
-                            }
-                        })
-                Spacer(modifier = Modifier.padding(6.dp))
-                Image(
-                    painterResource(id = if (!seeMore) R.drawable.down_arrow else R.drawable.up_arrow),
-                    contentDescription = "Search Menu",
-                    modifier = Modifier
-                        .height(27.dp)
-                        .clickable {
-                            if (seeMore) {
-                                seeMore = !seeMore
-                            } else {
-                                seeMore = !seeMore
-                                profileVM.getUser(username)
-                            }
+            Text(username,style=MaterialTheme.typography.subtitle1,color=MaterialTheme.colors.onBackground)
+            Text("DELETE",Modifier.clickable(onClick = {profileVM.deletion()}))
+            Text(if (!seeMore) showmore else showless,
+                modifier = Modifier
+                    .clickable {
+                        if (seeMore) {
+                            seeMore = !seeMore
+                        } else {
+                            seeMore = !seeMore
+                            profileVM.getUser(username)
                         }
-                )
-            }
+                    },style=MaterialTheme.typography.subtitle1,color=MaterialTheme.colors.onBackground
+            )
         }
         if (seeMore) {
-            UserProfile(user = user,navController)
-            if (user.username != "") {
+            UserProfile(user = user)
+            if (user.username == username){
                 ButtonClickItem(desc = edit, onClick = { visibleEdit = !visibleEdit })
             } else {
-                Text("Cant get the user info profile.")
+                Text("")
             }
         }
 
@@ -175,36 +183,31 @@ fun ProfileScreen(navController: NavHostController) {
                     visibleProfile = text
                     if (text == wall) profileVM.getWall(username) else addVM.getAllUserTrading(username)
                 }, text = {
-                    Text(text, modifier = Modifier
-                        .padding(6.dp),
-                        style = if (visibleProfile == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
-                        color = if (visibleProfile == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary)
+                    Text(text,
+                        style = if (visibleProfile == text) MaterialTheme.typography.h2 else MaterialTheme.typography.button,
+                        color = if (visibleProfile == text) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground)
                 })
             }
         }
         Scaffold(scaffoldState = scaffoldState) {
             if (visibleProfile == wall) {
                 ConstraintLayout(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 24.dp)
+                    modifier = Modifier.fillMaxSize()
                 ){
                     val wallDescState = remember { TextFieldState ()}
-                    val (wallConstraint, wallChat,divider) = createRefs()
-                    Icon(painter = painterResource(id = R.drawable.ic_reply),"",
-                    tint=MaterialTheme.colors.primaryVariant,)
-                    Divider(color = MaterialTheme.colors.onSurface.copy(alpha = .2f),
+                    val (wallConstraint, wallChat, spacerText) = createRefs()
+                    Spacer(
                         modifier = Modifier
-                            .padding(start = 12.dp, end = 12.dp, bottom = 2.dp, top = 7.dp)
-                            .constrainAs(divider) {
+                            .constrainAs(spacerText) {
                                 start.linkTo(parent.start)
                                 top.linkTo(parent.top)
-                                bottom.linkTo(wallConstraint.top)
                                 end.linkTo(parent.end)
-                            })
+                            }
+                            .padding(2.dp)
+                    )
                     Column(Modifier.constrainAs(wallConstraint){
                         start.linkTo(parent.start)
-                        top.linkTo(divider.bottom)
+                        top.linkTo(spacerText.bottom)
                         end.linkTo(parent.end)
                     }) {
                         WallList(
@@ -221,12 +224,12 @@ fun ProfileScreen(navController: NavHostController) {
                             },verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
                         Card(
                             Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(4.dp),
                             backgroundColor = MaterialTheme.colors.background
                         ){
                             Row(
-                                Modifier.padding(8.dp)
-                                    .fillMaxWidth(),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
                                 Row(Modifier.weight(5f),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
                                     EditTextStringItem(state=wallDescState)
                                 }
@@ -237,7 +240,7 @@ fun ProfileScreen(navController: NavHostController) {
                                             profileVM.saveWall(
                                                 Wall(
                                                     username,
-                                                    user.username,
+                                                    user.ign,
                                                     user.clubName,
                                                     username,
                                                     wallDescState.text,
@@ -253,27 +256,33 @@ fun ProfileScreen(navController: NavHostController) {
                                         }
                                     },modifier = Modifier
                                         .then(Modifier.size(50.dp))
-                                        .border(1.dp, MaterialTheme.colors.secondaryVariant, shape = CircleShape)
-                                        .background(MaterialTheme.colors.secondary,shape= CircleShape)
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colors.background,
+                                            shape = CircleShape
+                                        )
+                                        .background(
+                                            MaterialTheme.colors.primary,
+                                            shape = CircleShape
+                                        )
                                     ){
                                         Icon(imageVector = Icons.Filled.Send, contentDescription = "",
-                                            tint=Color.White)
+                                            tint=MaterialTheme.colors.background)
                                     }
                                 }
                             }
                         }
                     }
-
                 }
             } else {
                 Column(
                     Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    DividerItem()
+                    Spacer(Modifier.padding(4.dp))
                     postList.forEach { trading1 ->
                         Card(
                             Modifier.fillMaxWidth(),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primaryVariant),
                             shape = RoundedCornerShape(8.dp),
                             backgroundColor = MaterialTheme.colors.secondary
                         ) {
@@ -291,13 +300,14 @@ fun ProfileScreen(navController: NavHostController) {
                                 },navController
                             )
                         }
-                        Spacer(modifier = Modifier.padding(3.dp))
+                        Spacer(modifier = Modifier.padding(4.dp))
                     }
                 }
             }
         }
     }
 }
+
 
 
 

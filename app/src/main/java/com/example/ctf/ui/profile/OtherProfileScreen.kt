@@ -2,33 +2,35 @@ package com.example.ctf.ui.profile
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.ctf.R
 import com.example.ctf.data.local.entities.Trading
 import com.example.ctf.data.local.entities.User
 import com.example.ctf.data.local.entities.Wall
 import com.example.ctf.ui.add.AddViewModel
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
-import com.example.ctf.util.Constants
+import com.example.ctf.util.Constants.TIMERKEYPREF
 import com.example.ctf.util.Status
 import com.example.ctf.util.listString.edit
 import com.example.ctf.util.listString.post
-import com.example.ctf.util.listString.send
 import com.example.ctf.util.listString.showless
 import com.example.ctf.util.listString.showmore
 import com.example.ctf.util.listString.wall
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun OtherProfileScreen(pengguna:String,navController: NavHostController){
@@ -39,13 +41,14 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
+        AdvertView()
         val authVM = hiltViewModel<AuthViewModel>()
-        val addVM = hiltViewModel<AddViewModel>()
         val profileVM= hiltViewModel<ProfileViewModel>()
-        var user by remember { mutableStateOf(User("Fina","","","","","","")) }
+        val addVM = hiltViewModel<AddViewModel>()
+        var user by remember { mutableStateOf(User("Fina","","","","","Please check your connection.",  System.currentTimeMillis()-61000,"")) }
         GetAuthenticateFunction()
-        var wallList= listOf<Wall>()
-        var postList=listOf<Trading>()
+        val wallList = mutableListOf<Wall>()
+        val postList = mutableListOf<Trading>()
         var trading by remember{mutableStateOf(Trading("","",""))}
         val username= getUsernameLoginFunction()
         val scaffoldState = rememberScaffoldState()
@@ -68,7 +71,7 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
             when(result.status){
                 Status.SUCCESS -> {
                     authVM.sharedPref.edit()
-                        .putString(Constants.TIMERKEYPREF, (System.currentTimeMillis() + 25000L).toString())
+                        .putString(TIMERKEYPREF, (System.currentTimeMillis() + 25000L).toString())
                         .apply()
                 }
                 Status.ERROR -> {  }
@@ -81,7 +84,12 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
         getWallState.value?.let {
             when(it.status){
                 Status.SUCCESS ->{
-                    wallList = it.data ?: return@let
+                    it.data?.let { listWall ->
+                        wallList.clear()
+                        listWall.forEach { wall ->
+                            wallList.add(wall)
+                        }
+                    } ?: wallList.clear()
                 }
                 Status.ERROR -> {  }
                 Status.LOADING -> {
@@ -93,7 +101,12 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
         allUserTradingState.value?.let {
             when(it.status){
                 Status.SUCCESS ->{
-                    postList = it.data ?: return@let
+                    it.data?.let { listTrading ->
+                        postList.clear()
+                        listTrading.forEach { trading ->
+                            postList.add(trading)
+                        }
+                    } ?: postList.clear()
                 }
                 Status.ERROR -> { }
                 Status.LOADING -> {
@@ -119,44 +132,25 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
             EditProfileDialog(user = user,onClick={visibleEdit=!visibleEdit},pengguna)
         }
         Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            Text(pengguna)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.End
-            ){
-                Text(if (!seeMore) showmore else showless,
+            Text(pengguna,style=MaterialTheme.typography.subtitle1,color=MaterialTheme.colors.onBackground)
+            Text(if (!seeMore) showmore else showless,
                 modifier = Modifier
-                    .height(36.dp)
                     .clickable {
                         if (seeMore) {
                             seeMore = !seeMore
                         } else {
                             seeMore = !seeMore
-                            profileVM.getUser(pengguna)
+                            profileVM.getUser(username)
                         }
-                    })
-                Spacer(Modifier.padding(6.dp))
-                Image(
-                    painterResource(id = if (!seeMore) R.drawable.down_arrow else R.drawable.up_arrow),
-                    contentDescription = "Search Menu",
-                    modifier = Modifier
-                        .height(27.dp)
-                        .clickable {
-                            if (seeMore) {
-                                seeMore = !seeMore
-                            } else {
-                                seeMore = !seeMore
-                                profileVM.getUser(pengguna)
-                            }
-                        }
-                )
-            }
+                    },style=MaterialTheme.typography.subtitle1,color=MaterialTheme.colors.onBackground
+            )
         }
         if(seeMore){
-            UserProfile(user = user,navController)
-            if(user.username != ""){
+            UserProfile(user = user)
+            if (user.username == username){
                 ButtonClickItem(desc = edit,onClick = {visibleEdit=!visibleEdit})
             }else{
-                Text("Cant get the user info profile.")
+                Text("")
             }
         }
 
@@ -172,55 +166,119 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
                     visibleProfile=text
                     if(text==wall) profileVM.getWall(pengguna) else addVM.getAllUserTrading(pengguna)
                 },text={
-                    Text(text, modifier = Modifier
-                        .padding(6.dp),
-                        style = if (visibleProfile == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
-                        color = if (visibleProfile == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary)
+                    Text(text,
+                        style = if (visibleProfile == text) MaterialTheme.typography.h2 else MaterialTheme.typography.button,
+                        color = if (visibleProfile == text) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground)
                 })
             }
         }
         Scaffold(scaffoldState = scaffoldState) {
             if(visibleProfile==wall){
-                Column (horizontalAlignment = Alignment.CenterHorizontally,verticalArrangement = Arrangement.Center){
+                ConstraintLayout(
+                    modifier=Modifier.fillMaxSize()
+                ){
                     val wallDescState = remember { TextFieldState() }
-                    Row(Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
-                        Row(Modifier.weight(4f),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
-                            TextFieldOutlined(desc = wall,wallDescState)
-                        }
-                        Row(Modifier.weight(1f),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
-                            ButtonClickItem(desc = send,onClick = {
-                                if(authVM.timerLeft()<=0){
-                                    profileVM.saveWall(
-                                        Wall(
-                                            username,
-                                            user.name,
-                                            user.clubName,
-                                            pengguna,
-                                            wallDescState.text),
-                                        pengguna
-                                    )
-                                }else{
-                                    snackbarCoroutineScope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar("wait ${authVM.timerLeft()} seconds left")
+                    val (wallConstraint,wallChat,spacerText)=createRefs()
+                    Spacer(
+                        modifier = Modifier
+                            .constrainAs(spacerText) {
+                                start.linkTo(parent.start)
+                                top.linkTo(parent.top)
+                                end.linkTo(parent.end)
+                            }
+                            .padding(2.dp)
+                    )
+                    Column(Modifier.constrainAs(wallConstraint) {
+                        start.linkTo(parent.start)
+                        top.linkTo(spacerText.bottom)
+                        end.linkTo(parent.end)
+                    }) {
+                        WallList(
+                            wallList,navController,Modifier
+                                .verticalScroll(rememberScrollState()))
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .constrainAs(wallChat) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                bottom.linkTo(parent.bottom)
+                            },verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center){
+                        Card(
+                            Modifier.fillMaxWidth(),
+                            backgroundColor = MaterialTheme.colors.background
+                        ){
+                            Row(
+                                Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Center) {
+                                Row(
+                                    Modifier.weight(5f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    EditTextStringItem(state = wallDescState)
+                                }
+                                Spacer(Modifier.padding(2.dp))
+                                Row(
+                                    Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            if (authVM.timerLeft() <= 0) {
+                                                profileVM.saveWall(
+                                                    Wall(
+                                                        username,
+                                                        user.ign,
+                                                        user.clubName,
+                                                        pengguna,
+                                                        wallDescState.text
+                                                    ),
+                                                    pengguna
+                                                )
+                                            } else {
+                                                snackbarCoroutineScope.launch {
+                                                    scaffoldState.snackbarHostState.showSnackbar(
+                                                        "wait ${authVM.timerLeft()} seconds left"
+                                                    )
+                                                }
+                                            }
+                                        }, modifier = Modifier
+                                            .then(Modifier.size(50.dp))
+                                            .border(
+                                                1.dp,
+                                                MaterialTheme.colors.background,
+                                                shape = CircleShape
+                                            )
+                                            .background(
+                                                MaterialTheme.colors.primary,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Send,
+                                            contentDescription = "",
+                                            tint = MaterialTheme.colors.background
+                                        )
                                     }
                                 }
-                            })
+                            }
                         }
                     }
-                    DividerItem()
-                    WallList(
-                        wallList,navController,Modifier
-                        .verticalScroll(rememberScrollState()))
+
                 }
             }else{
                 Column(
                     Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    DividerItem()
+                    Spacer(Modifier.padding(4.dp))
                     postList.forEach{trading1 ->
                         Card (
                             Modifier.fillMaxWidth(),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primaryVariant),
                             shape = RoundedCornerShape(8.dp),
                             backgroundColor = MaterialTheme.colors.secondary
                         ){
@@ -238,7 +296,7 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
                                 },navController
                             )
                         }
-                        Spacer(modifier = Modifier.padding(3.dp))
+                        Spacer(modifier = Modifier.padding(4.dp))
                     }
                 }
             }

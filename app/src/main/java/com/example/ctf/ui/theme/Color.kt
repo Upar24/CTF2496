@@ -2,20 +2,13 @@ package com.example.ctf.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-
-val black = Color(0xFF000914)
-val dongker = Color(0xFF024468)
-val whitedonker = Color(0xFFBEC3E6)
-val sky = Color(0xFF61C2F7)
-val skylight = Color(0x9A4EBCF8)
-val dongkerlight = Color(0xFF026194)
-val whitedongkerlight = Color(0xFFCEE7F5)
-val blue = Color(0xFF039CF0)
-val tintdark = Color(0xFF8BCFF3)
-val blue1 = Color(0xFF0C5A85)
-val bluewhite = Color(0xFFC0DDEC)
-val white = Color(0xFFFFFFFF)
-val whitesurface = Color(0xFFBED8E6)
-val onerror = Color(0xFF0097A7)
-val testing = Color(0xFFB1A1A3)
-//B2B2E2
+val whiteblue = Color(0xFFDBDBFD)
+val uranianblue = Color(0xffADD7F6)
+val frenchskyblue = Color(0xff87BFFF)
+val dodgerblue = Color(0xff3F8EFC)
+val ultramarineblue = Color(0xff2667ff)
+val CGblue = Color(0xFF1282A2)
+val indigodye = Color(0xff034078)
+val darkblue = Color(0xFF01016B)
+val yellowcustom = Color(0xFFDBD102)
+val greencustom = Color(0xFF186B01)

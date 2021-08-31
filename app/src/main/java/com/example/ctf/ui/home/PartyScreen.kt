@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.ctf.data.local.entities.Dropped
 import com.example.ctf.data.local.entities.Party
 import com.example.ctf.data.local.entities.Today
@@ -36,7 +37,7 @@ import com.example.ctf.util.listString.vipp
 import com.example.ctf.util.listString.vipp7
 
 @Composable
-fun PartyScreen() {
+fun PartyScreen(navController: NavHostController) {
     val homeVM = hiltViewModel<HomeViewModel>()
     var today = Today("", "", "")
     val regulerDropList = mutableListOf<Dropped>()
@@ -175,11 +176,12 @@ fun PartyScreen() {
             }
         }
     }
-    Column(Modifier.padding(4.dp)) {
+    Column{
         if (saveTodayDialog) SaveTodayDialog(today,onClick={saveTodayDialog = !saveTodayDialog})
         if (saveDropDialog) SaveDropDialog(onClick={saveDropDialog=!saveDropDialog})
         if (savePartyDialog) SavePartyDialog(Party(role= visibleParty,"","",NA))
-        if (userListDialog) ObserveUserList({userListDialog= !userListDialog})
+        if (userListDialog) ObserveUserList(onClick={userListDialog= !userListDialog},navController = navController)
+        Spacer(Modifier.padding(2.dp))
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,7 +191,6 @@ fun PartyScreen() {
 
             Spacer(
                 modifier = Modifier
-                    .padding(2.dp)
                     .constrainAs(spacerText) {
                         centerVerticallyTo(regulerText)
                         centerHorizontallyTo(parent)
@@ -198,9 +199,9 @@ fun PartyScreen() {
             )
             Text(
                 "Today Reguler: ${today.reguler}",
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.body1,
                 modifier = Modifier
-                    .padding(bottom = 6.dp)
+                    .padding(bottom = 8.dp,top=8.dp)
                     .constrainAs(regulerText) {
                         start.linkTo(parent.start)
                         bottom.linkTo(listReguler.top)
@@ -209,9 +210,9 @@ fun PartyScreen() {
             )
             Text(
                 "Today Ultra: ${today.ultra}",
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.body1,
                 modifier = Modifier
-                    .padding(bottom = 6.dp)
+                    .padding(bottom = 8.dp,top=8.dp)
                     .constrainAs(ultraText) {
                         start.linkTo(spacerText.end)
                         bottom.linkTo(listUltra.top)
@@ -246,7 +247,7 @@ fun PartyScreen() {
                 }
             }
         }
-        Spacer(modifier = Modifier.padding(2.dp))
+        Spacer(modifier = Modifier.padding(4.dp))
         var tabIndex by remember { mutableStateOf(0) }
         ScrollableTabRow(
             selectedTabIndex = tabIndex, modifier = Modifier.fillMaxWidth(),
@@ -260,15 +261,12 @@ fun PartyScreen() {
                 }, text = {
                     Text(
                         text,
-                        modifier = Modifier
-                            .padding(6.dp),
-                        style = if (visibleParty == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
-                        color = if (visibleParty == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+                        style = if (visibleParty == text) MaterialTheme.typography.h2 else MaterialTheme.typography.button,
+                        color = if (visibleParty == text)colors.primary else colors.onBackground
                     )
                 })
             }
         }
-        Spacer(modifier = Modifier.padding(3.dp))
         val listDisplay:MutableList<Party> = when(visibleParty){
             arts -> artsList
             thebc -> thebcList
@@ -287,13 +285,12 @@ fun PartyScreen() {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp)
         ) {
 
             listDisplay.forEach { party->
                 Card(
                     Modifier.fillMaxWidth(),
-                    border = BorderStroke(1.dp,colors.onSurface),
+                    border = BorderStroke(1.dp,colors.primaryVariant),
                     shape = RoundedCornerShape(8.dp),
                     backgroundColor =colors.secondary
                 ) {
@@ -303,7 +300,7 @@ fun PartyScreen() {
                         Modifier
                             .fillMaxWidth()
                             .clickable { editPartyDialog = !editPartyDialog }
-                            .padding(start = 6.dp, end = 6.dp, top = 3.dp, bottom = 3.dp),
+                            .padding(8.dp),
                         horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically
                     ) {
@@ -321,43 +318,43 @@ fun PartyScreen() {
                         }
                         Row(Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(party.status)
+                                Text(party.status,color=colors.onBackground,style=MaterialTheme.typography.body1)
                                 Spacer(modifier = Modifier.padding(2.dp))
-                                Text(status)
+                                Text(status,color=colors.onBackground,style=MaterialTheme.typography.subtitle2)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 if(check){
                                     Text(countChecked.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.check)
-                                            userListDialog = !userListDialog},Color.Yellow)
+                                            userListDialog = !userListDialog},colors.error,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Checked",Modifier.clickable {
-                                        homeVM.toggleCheck(party)},Color.Yellow)
+                                        homeVM.toggleCheck(party)},colors.error,style=MaterialTheme.typography.subtitle2)
                                 }else{
                                     Text(countChecked.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.check)
-                                            userListDialog = !userListDialog})
+                                            userListDialog = !userListDialog},colors.onBackground,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Check",Modifier.clickable {
-                                        homeVM.toggleCheck(party)
-                                    })
+                                        homeVM.toggleCheck(party)},colors.onBackground,style=MaterialTheme.typography.body1
+                                    )
                                 }
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 if(nope){
                                     Text(countNope.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.nope)
-                                            userListDialog = !userListDialog},Color.Red)
+                                            userListDialog = !userListDialog},Color.Red,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Nope",Modifier.clickable {
-                                        homeVM.toggleNope(party)},Color.Red)
+                                        homeVM.toggleNope(party)},Color.Red,style=MaterialTheme.typography.subtitle2)
                                 }else{
                                     Text(countNope.toString(),Modifier
                                         .clickable{homeVM.getListUser(party.nope)
-                                            userListDialog = !userListDialog})
+                                            userListDialog = !userListDialog},colors.onBackground,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Nope",Modifier.clickable {
-                                        homeVM.toggleNope(party)},)
+                                        homeVM.toggleNope(party)},colors.onBackground,style=MaterialTheme.typography.body1)
                                 }
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -366,23 +363,23 @@ fun PartyScreen() {
                                     Text(countDropped.toString(),
                                         Modifier
                                             .clickable{homeVM.getListUser(party.drop)
-                                                userListDialog = !userListDialog},Color.Green)
+                                                userListDialog = !userListDialog},colors.onError,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Dropped",Modifier.clickable {
-                                        homeVM.toggleDrop(party)},Color.Green)
+                                        homeVM.toggleDrop(party)},colors.onError,style=MaterialTheme.typography.subtitle2)
                                 }else{
                                     Text(countDropped.toString(),Modifier
-                                        .clickable{homeVM.getListUser(party.drop)
-                                            userListDialog = !userListDialog})
+                                        .clickable{homeVM.getListUser(party.drop,)
+                                            userListDialog = !userListDialog},colors.onBackground,style=MaterialTheme.typography.body1)
                                     Spacer(modifier = Modifier.padding(2.dp))
                                     Text("Drop",Modifier.clickable {
-                                        homeVM.toggleDrop(party) },)
+                                        homeVM.toggleDrop(party) },colors.onBackground,style=MaterialTheme.typography.body1)
                                 }
                             }
                         }
                     }
                 }
-                Spacer(modifier = Modifier.padding(3.dp))
+                Spacer(modifier = Modifier.padding(2.dp))
             }
         }
     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.ctf.ui.component.AdvertView
 import com.example.ctf.util.listString.calculation
 import com.example.ctf.util.listString.chatchar
 import com.example.ctf.util.listString.partychar
@@ -31,6 +32,8 @@ fun HomeScreen(navController: NavHostController
             .fillMaxSize()
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp)
     ) {
+
+        AdvertView()
         var tabIndex by remember { mutableStateOf(1)}
         val homeItem = listOf(partychar, calculation,chatchar)
         TabRow(selectedTabIndex = tabIndex,Modifier.fillMaxWidth(),
@@ -40,8 +43,8 @@ fun HomeScreen(navController: NavHostController
                     tabIndex=index
                     visibleHome=text
                 },text={
-                    Text(text,color=if (visibleHome == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary,
-                        style = if (visibleHome == text) MaterialTheme.typography.subtitle2 else MaterialTheme.typography.body2
+                    Text(text,color=if (visibleHome == text) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                        style = if (visibleHome == text) MaterialTheme.typography.h2 else MaterialTheme.typography.button
                     )
                 })
             }
@@ -50,10 +53,10 @@ fun HomeScreen(navController: NavHostController
             homeVM.getToday()
             homeVM.getDropList()
             homeVM.getPartyList()
-            PartyScreen()
+            PartyScreen(navController)
         }else if(visibleHome== chatchar){
-            ChatScreen(navController)
             homeVM.getChat()
+            ChatScreen(navController)
         }else{
             CalculationScreen()
         }

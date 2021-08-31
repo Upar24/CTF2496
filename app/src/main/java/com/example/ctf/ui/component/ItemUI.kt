@@ -1,5 +1,9 @@
 package com.example.ctf.ui.component
 
+import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -21,12 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.ctf.R
@@ -91,9 +96,16 @@ import com.example.ctf.util.listString.reguler
 import com.example.ctf.util.listString.save
 import com.example.ctf.util.listString.title
 import com.example.ctf.util.listString.ultra
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.NumberFormat
 import java.util.*
-
+import javax.inject.Inject
 
 @Composable
 fun ProfileInfoItem(number:String,desc:String){
@@ -103,12 +115,14 @@ fun ProfileInfoItem(number:String,desc:String){
     ){
         Text(
             text = number,
-            style = MaterialTheme.typography.button
+            style = MaterialTheme.typography.button,
+            color=MaterialTheme.colors.onBackground
         )
         Spacer(Modifier.padding(2.dp))
         Text(
             text=desc,
-            style= MaterialTheme.typography.body2
+            style= MaterialTheme.typography.body1,
+            color=MaterialTheme.colors.onBackground
         )
     }
 }
@@ -141,47 +155,58 @@ fun SwitchTOLoginOrRegisterTexts(modifier: Modifier,text1: String,text2: String,
     }
 }
 @Composable
-fun EditTextStringItem(state: TextFieldState = remember {TextFieldState()}){
-    TextField(
-        value =state.text,
-        onValueChange = {
-            state.text = it
-        },
-        placeholder={Text("Type something")},
-        shape= RoundedCornerShape(24.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        modifier=Modifier.height(48.dp)
-    )
-}
-@Composable
 fun TextFieldOutlined(desc:String,state: TextFieldState = remember {TextFieldState()}){
     OutlinedTextField(
         label={Text(text=desc,style=MaterialTheme.typography.body1)},
         value =state.text,
         onValueChange = {
             state.text = it
-        }
+        },
+        textStyle = MaterialTheme.typography.body2,
+        shape=RoundedCornerShape(8.dp)
     )
+}
+//lam9
+@Composable
+fun EditTextStringItem(state: TextFieldState = remember {TextFieldState()},text:String="Type Something"){
+    TextField(
+        value =state.text,
+        onValueChange = {
+            state.text = it
+        },
+        textStyle=MaterialTheme.typography.body2,
+        placeholder={Text(text,style=MaterialTheme.typography.body1)},
+        shape= RoundedCornerShape(24.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+
+        )
 }
 @Composable
 fun EditTextItem(modifier: Modifier=Modifier, desc: String, state: TextFieldState=remember{ TextFieldState() }, keyboard : KeyboardOptions= KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)) {
     TextField(
         value = state.text,
-        onValueChange ={
-                       if(!it.isEmpty()){
-                           val result = it.filter{it.isLetterOrDigit()}
-                           state.text=NumberFormat.getNumberInstance(Locale.US).format(result.toLong())
-                       }else{
-                           state.text="0"
-                       }
+        onValueChange ={string ->
+            if(string.isNotEmpty()){
+                val result = string.filter{it.isLetterOrDigit()}
+                state.text=NumberFormat.getNumberInstance(Locale.US).format(result.toLong())
+            }else{
+                state.text="0"
+            }
         },
-        label = {Text(desc,style = MaterialTheme.typography.body1)},
+        placeholder = {Text(desc,style = MaterialTheme.typography.body1)},
         modifier = modifier,
-        keyboardOptions = keyboard
+        keyboardOptions = keyboard,
+        shape= RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+        textStyle=MaterialTheme.typography.body2
     )
 }
 @Composable
@@ -189,34 +214,34 @@ fun ButtonClickItem(
     modifier: Modifier = Modifier,
     desc: String,
     onClick: () -> Unit,
-    warna: Color = MaterialTheme.colors.onSurface,
-    colors:ButtonColors = ButtonDefaults.buttonColors(MaterialTheme.colors.secondary),
+    bordercolor: Color = MaterialTheme.colors.background,
+    colors:ButtonColors = ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
 ) {
     Button(
         onClick =  onClick,
-        border= BorderStroke(2.dp,warna),
+        border= BorderStroke(2.dp,bordercolor),
         colors = colors,
         shape = RoundedCornerShape(12.dp),
         modifier = modifier
     ){
-        Text(desc,style=MaterialTheme.typography.button,color= warna)
+        Text(desc,style=MaterialTheme.typography.button,color= bordercolor)
     }
 }
 @Composable
 fun CardDrop(dropped: Dropped){
     Card(
-        border=BorderStroke(1.dp,MaterialTheme.colors.onSurface),
+        border=BorderStroke(1.dp,MaterialTheme.colors.primaryVariant),
         shape= RoundedCornerShape(8.dp),
         backgroundColor = MaterialTheme.colors.secondary
     ){
         Column(
             Modifier
-                .padding(6.dp),
+                .padding(8.dp),
             horizontalAlignment = CenterHorizontally,
         ){
-            Text("Day ${dropped.day}",style=MaterialTheme.typography.body2)
-            Text(dropped.name,style = MaterialTheme.typography.h1)
-            Text("${dropped.duration} hrs",style = MaterialTheme.typography.caption)
+            Text("Day ${dropped.day}",style=MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
+            Text(dropped.name,style = MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
+            Text("${dropped.duration} hrs",style = MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
         }
     }
 }
@@ -234,7 +259,7 @@ fun ProgressBarItem(){
         ) {
             CircularProgressIndicator()
             Spacer(Modifier.size(10.dp))
-            Text(text=pleasewait)
+            Text(text=pleasewait,style=MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
         }
     }
 }
@@ -249,31 +274,19 @@ fun ProgressCardToastItem(){
         Card(
             modifier = Modifier
                 .fillMaxWidth(1f)
-                .padding(12.dp),
+                .padding(16.dp),
             shape= RoundedCornerShape(8.dp),
-            backgroundColor = MaterialTheme.colors.surface
+            backgroundColor = MaterialTheme.colors.secondary
         ){
             ProgressBarItem()
         }
     }
 }
 @Composable
-fun ImageItemClick(id:Int,onIconClick: () -> Unit){
-    Image(
-        painterResource(id),
-        contentDescription = null,
-        modifier = Modifier
-            .clickable(
-                onClick = onIconClick
-            )
-            .height(27.dp)
-    )
-}
-@Composable
 fun SvgItemClick(icon:Int,onClick: () -> Unit){
     Icon(
         painter = painterResource(id = icon),"",
-        tint=MaterialTheme.colors.primaryVariant,
+        tint=MaterialTheme.colors.primary,
         modifier=Modifier.clickable(onClick=onClick))
 }
 @Composable
@@ -281,44 +294,42 @@ fun IconItemClick(icon: ImageVector, onIconClick: () -> Unit){
     Icon(
         imageVector = icon,
         contentDescription ="",
-        tint=MaterialTheme.colors.primaryVariant,
-        modifier=Modifier.clickable(onClick = onIconClick)
+        tint=MaterialTheme.colors.primary,
+        modifier= Modifier
+            .clickable(onClick = onIconClick)
+            .size(24.dp)
     )
 }
 @Composable
 fun TopBarItem(onIconClick: () -> Unit){
-    Row(modifier= Modifier
-        .background(color = MaterialTheme.colors.background),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        IconItemClick(icon = Icons.Filled.Menu,onIconClick)
-        Spacer(Modifier.padding(12.dp))
+    Row(Modifier.padding(8.dp),verticalAlignment = Alignment.CenterVertically){
+        IconItemClick(icon = Icons.Filled.Menu,onIconClick = onIconClick)
         Text(
             text = "CTForever",
-            color = MaterialTheme.colors.onPrimary,
-            fontSize = 20.sp,fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.h1,
+            modifier=Modifier.padding(start=16.dp)
         )
     }
 }
 @Composable
 fun ChatCard(chat: Chat,navController: NavHostController){
     Card(
-        border=BorderStroke(1.dp,MaterialTheme.colors.onSurface),
+        border=BorderStroke(1.dp,MaterialTheme.colors.primaryVariant),
         shape= RoundedCornerShape(8.dp),
         backgroundColor = MaterialTheme.colors.secondary
     ){
-        Column {
+        Column(Modifier.padding(8.dp)) {
             HeaderCardItem(text1 = getTimePost(chat.date), text2 = chat.username.toString(), text3 = chat.clubName.toString(),navController)
             DividerItem()
-            Text(chat.chat.toString(),Modifier.padding(8.dp),textAlign=TextAlign.Justify)
+            Text(chat.chat.toString(),textAlign=TextAlign.Justify,color=MaterialTheme.colors.onBackground,style=MaterialTheme.typography.body1)
         }
     }
 }
 @Composable
 fun TradingCard(username:String, trading: Trading, editClick: () -> Unit, deleteClick: () -> Unit ,navController: NavHostController){
     Card(
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+        border = BorderStroke(1.dp, MaterialTheme.colors.primaryVariant),
         shape = RoundedCornerShape(8.dp),
         backgroundColor = MaterialTheme.colors.secondary
     )
@@ -327,8 +338,8 @@ fun TradingCard(username:String, trading: Trading, editClick: () -> Unit, delete
 
             HeaderCardItem(getTimePost(trading.date),trading.username.toString(),trading.ign.toString(),navController)
             DividerItem()
-            Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
-                Row(Modifier.weight(5f,),horizontalArrangement = Arrangement.Start,verticalAlignment = Alignment.CenterVertically){
+            Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween,Alignment.CenterVertically){
+                Row(Modifier.weight(5f),horizontalArrangement = Arrangement.Start,verticalAlignment = Alignment.CenterVertically){
                     TwoTextItem(title,trading.title.toString())
                 }
                 if(username==trading.username){
@@ -341,7 +352,9 @@ fun TradingCard(username:String, trading: Trading, editClick: () -> Unit, delete
                 }
             }
             TwoTextItem("Description", trading.desc.toString())
-            Row(Modifier.fillMaxWidth(),horizontalArrangement =Arrangement.SpaceBetween){
+            Row(
+                Modifier
+                    .fillMaxWidth(),horizontalArrangement =Arrangement.SpaceBetween){
                 TwoTextItem("Buying", "${trading.amountBuying} ${trading.itemBuying}" )
                 TwoTextItem("Selling", "${trading.amountSelling} ${trading.itemSelling}" )
             }
@@ -351,8 +364,8 @@ fun TradingCard(username:String, trading: Trading, editClick: () -> Unit, delete
 @Composable
 fun TwoTextItem(text1:String,text2:String){
     Column {
-        Text(text1, style = MaterialTheme.typography.caption)
-        Text(text2,textAlign = TextAlign.Justify)
+        Text(text1, color=MaterialTheme.colors.onBackground,style = MaterialTheme.typography.subtitle2)
+        Text(text2,color=MaterialTheme.colors.onBackground,textAlign = TextAlign.Justify,style=MaterialTheme.typography.body2)
     }
 }
 @Composable
@@ -361,17 +374,19 @@ fun HeaderCardItem(text1:String,text2: String,text3:String,navController: NavHos
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(8.dp).clickable(onClick={
-                    navController.navigate(BottomNavigationScreens.OtherProfile.withArgs(text2))})
+                .padding(8.dp)
+                .clickable(onClick = {
+                    navController.navigate(BottomNavigationScreens.OtherProfile.withArgs(text2))
+                })
         ) {
             Row(Modifier.weight(1f)) {
-                Text(text1,Modifier.fillMaxWidth())
+                Text(text1,Modifier.fillMaxWidth(),style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
             }
             Row(Modifier.weight(1f)) {
-                Text(text2,Modifier.fillMaxWidth(),textAlign = TextAlign.Center)
+                Text(text2,Modifier.fillMaxWidth(),textAlign = TextAlign.Center,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
             }
-            Row(Modifier.weight(1f),) {
-                Text(text3,Modifier.fillMaxWidth(),textAlign = TextAlign.End)
+            Row(Modifier.weight(1f)) {
+                Text(text3,Modifier.fillMaxWidth(),textAlign = TextAlign.End,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
             }
         }
     }
@@ -379,7 +394,7 @@ fun HeaderCardItem(text1:String,text2: String,text3:String,navController: NavHos
 @Composable
 fun WallCard(wall: Wall?, onWall: () -> Unit, onDelete:() ->Unit,navController: NavHostController){
     Card(
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+        border = BorderStroke(1.dp, MaterialTheme.colors.primaryVariant),
         shape = RoundedCornerShape(8.dp),
         backgroundColor = MaterialTheme.colors.secondary
     ) {
@@ -389,7 +404,7 @@ fun WallCard(wall: Wall?, onWall: () -> Unit, onDelete:() ->Unit,navController: 
                 DividerItem()
                 Row(Modifier.fillMaxWidth(),Arrangement.Center,verticalAlignment= Alignment.CenterVertically) {
                     Row(Modifier.weight(5f),Arrangement.Start,verticalAlignment=Alignment.CenterVertically){
-                        it.chat?.let { it1 -> Text(it1) }}
+                        it.chat?.let { it1 -> Text(it1,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground) }}
                     Row(Modifier.weight(1f),Arrangement.Center,verticalAlignment=Alignment.CenterVertically){
                         if((getUsernameLoginFunction()==it.wallOwner)) SvgItemClick(icon = R.drawable.ic_reply,onWall)}
                     Row(Modifier.weight(1f),Arrangement.Center,verticalAlignment=Alignment.CenterVertically){
@@ -405,18 +420,38 @@ fun WallCard(wall: Wall?, onWall: () -> Unit, onDelete:() ->Unit,navController: 
     }
 }
 @Composable
-fun UserProfile(user: User?,navController: NavHostController){
+fun UserProfile(user: User?){
     if(user?.username!=""){
         user?.let {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = CenterHorizontally) {
+                    .padding(8.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = CenterHorizontally
+            ){
                 DividerItem()
-                HeaderCardItem(text1 = it.name.toString(), text2 = it.ign.toString(), text3 =it.clubName.toString(),navController )
+                SelectionContainer {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Row(Modifier.weight(1f)) {
+                            Text(user.name.toString(),Modifier.fillMaxWidth(),style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
+                        }
+                        Row(Modifier.weight(1f)) {
+                            Text(user.ign.toString(),Modifier.fillMaxWidth(),textAlign = TextAlign.Center,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
+                        }
+                        Row(Modifier.weight(1f)) {
+                            Text(user.clubName.toString(),Modifier.fillMaxWidth(),textAlign = TextAlign.End,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
+                        }
+                    }
+                }
                 DividerItem()
-                Text("Bio")
-                Text(it.bio.toString())
+                Text("Age",style=MaterialTheme.typography.subtitle2)
+                Text(getTimePost(user.created),textAlign = TextAlign.Center,style = MaterialTheme.typography.body1)
+                DividerItem()
+                Text("Bio",style=MaterialTheme.typography.subtitle2)
+                Text(it.bio.toString(),textAlign = TextAlign.Justify,style=MaterialTheme.typography.body1)
                 DividerItem()
             }
         }
@@ -444,49 +479,51 @@ fun EditProfileDialog(user: User,onClick: () -> Unit,username: String){
 
     if(openEdit){
         AlertDialog(
-                modifier= Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.7f)
-                    .padding(6.dp),
-                onDismissRequest=onClick,
-                title = {
-                    Text(text = editprofile,modifier=Modifier.padding(12.dp))
-                },
-                text = {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = CenterHorizontally
-                    ) {
-                        TextFieldOutlined(desc = "Name", nameState)
-                        TextFieldOutlined(desc = "Club Name", clubNameState)
-                        TextFieldOutlined(desc = "IGN", ignState)
-                        TextFieldOutlined(desc = "Bio", bioState)
-                    }
-                },
-                confirmButton ={
-                    ButtonClickItem(
-                        desc = save, onClick =
-                        {
-                            profileVM.updateProfile(
-                                UpdateUserRequest(
-                                    name=nameState.text,
-                                    clubName = clubNameState.text,
-                                    ign=ignState.text,
-                                    bio=bioState.text
-                                ), username
-                            )
-                            openEdit=false
-                        },colors=ButtonDefaults.buttonColors(MaterialTheme.colors.onError),warna = MaterialTheme.colors.onSurface
-                    )
-                },
-                dismissButton = {
-                    ButtonClickItem(desc = cancel, onClick = onClick,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.error),warna=MaterialTheme.colors.onSurface)
+            backgroundColor=MaterialTheme.colors.secondary,
+            modifier= Modifier
+                .fillMaxWidth(0.9f)
+                .fillMaxHeight(0.7f)
+                .padding(8.dp),
+            onDismissRequest=onClick,
+            title = {
+                Text(text = editprofile,style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground)
+            },
+            text = {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = CenterHorizontally
+                ) {
+                    TextFieldOutlined(desc = "Name", nameState)
+                    TextFieldOutlined(desc = "Club Name", clubNameState)
+                    TextFieldOutlined(desc = "IGN", ignState)
+                    TextFieldOutlined(desc = "Bio", bioState)
                 }
-            )
+            },
+            confirmButton ={
+                Text(save,modifier = Modifier
+                    .padding(8.dp)
+                    .clickable(onClick = {
+                        profileVM.updateProfile(
+                            UpdateUserRequest(
+                                name = nameState.text,
+                                clubName = clubNameState.text,
+                                ign = ignState.text,
+                                bio = bioState.text
+                            ), username
+                        )
+                        openEdit = false
+                    }),color=MaterialTheme.colors.primary,style=MaterialTheme.typography.subtitle2)
+            },
+            dismissButton = {
+                Text(cancel,
+                    Modifier
+                        .padding(8.dp)
+                        .clickable(onClick = onClick),color=Color.Red)
+            }
+        )
     }
 }
 @Composable
@@ -498,13 +535,13 @@ fun WallList(wallList: List<Wall>, navController: NavHostController, modifier: M
             WallCard(
                 wall = it,
                 onWall = {
-                navController.navigate(BottomNavigationScreens.OtherProfile.withArgs(it.username.toString()))},
+                    navController.navigate(BottomNavigationScreens.OtherProfile.withArgs(it.username.toString()))},
                 onDelete = {
-                authVM.isLoggedIn()
-                authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                profileVM.deleteWall(it.wallOwner.toString(),it)},navController
+                    authVM.isLoggedIn()
+                    authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
+                    profileVM.deleteWall(it.wallOwner.toString(),it)},navController
             )
-            Spacer(modifier = Modifier.padding(3.dp))
+            Spacer(modifier = Modifier.padding(4.dp))
         }
     }
 
@@ -520,13 +557,13 @@ fun SaveTodayDialog(today: Today,onClick: () -> Unit){
         val authVM= hiltViewModel<AuthViewModel>()
         if(openDialog){
             AlertDialog(
+                backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest=onClick,
-                title = { Text(text = "POTD") },
+                title = { Text(text = "POTD",style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) },
                 text = {
                     Row(
                         Modifier
-                            .padding(8.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .padding(8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -541,21 +578,39 @@ fun SaveTodayDialog(today: Today,onClick: () -> Unit){
                         }
                     }
                 },
-                confirmButton ={
-                    ButtonClickItem(desc = save, onClick = {
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        homeVM.saveToday(
-                            Today(
-                                regulerState.text,
-                                ultraState.text,
-                                idState.text
-                            )
-                        )
-                        openDialog=false
-                    },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.onError))},
+                confirmButton = {
+                    Text(
+                        save,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = {
+                                authVM.isLoggedIn()
+                                authVM.authenticateApi(
+                                    authVM.usernamevm ?: "",
+                                    authVM.passwordvm ?: ""
+                                )
+                                homeVM.saveToday(
+                                    Today(
+                                        regulerState.text,
+                                        ultraState.text,
+                                        idState.text
+                                    )
+                                )
+                                openDialog = false
+                            }),
+                        style = MaterialTheme.typography.subtitle2,
+                        color = MaterialTheme.colors.primary
+                    )
+                },
                 dismissButton = {
-                    ButtonClickItem(desc = cancel, onClick = onClick,warna=MaterialTheme.colors.onSurface,colors=ButtonDefaults.buttonColors(MaterialTheme.colors.error))
+                    Text(
+                        cancel,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = onClick),
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.Red
+                    )
                 }
             )
         }
@@ -563,7 +618,7 @@ fun SaveTodayDialog(today: Today,onClick: () -> Unit){
 }
 @Composable
 fun AddTradingDialog(trading: Trading? ){
-    Column() {
+    Column {
         var openDialog by remember { mutableStateOf(true)}
         val addVM = hiltViewModel<AddViewModel>()
         val titleState = remember { TextFieldState(trading?.title.toString()) }
@@ -575,74 +630,85 @@ fun AddTradingDialog(trading: Trading? ){
         val authVM= hiltViewModel<AuthViewModel>()
         if(openDialog){
             AlertDialog(
-                onDismissRequest={openDialog = false
-                    addVM.getAllTrading()
-                },
-                title = { Text(text = "Trading") },
+                backgroundColor=MaterialTheme.colors.secondary,
+                onDismissRequest={openDialog = false},
+                title = { Row(
+                    Modifier
+                        .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+                {Text(text = "Trading",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
                 text = {
                     Column(
                         Modifier
-                            .fillMaxHeight(0.9f)
-                            .padding(top = 24.dp, bottom = 12.dp, start = 6.dp, end = 6.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxHeight()
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = CenterHorizontally
                     ) {
-                        Spacer(modifier = Modifier.padding(6.dp))
-                        Spacer(modifier = Modifier.padding(6.dp))
+                        Spacer(modifier = Modifier.padding(8.dp))
                         TextFieldOutlined(desc = "Title", titleState)
-                        Spacer(modifier = Modifier.padding(3.dp))
+                        Spacer(modifier = Modifier.padding(4.dp))
                         TextFieldOutlined(desc = "Description", descState)
-                        Spacer(modifier = Modifier.padding(3.dp))
-                        Text("Item Buying")
+                        Spacer(modifier = Modifier.padding(4.dp))
+                        Text("Item Buying",style=MaterialTheme.typography.subtitle2)
                         Row(Modifier.fillMaxWidth()){
                             Row(Modifier.weight(3f)){
                                 TextFieldOutlined(desc = "Name Item", itemBuyingState)
                             }
-                            Row(Modifier.weight(1.4f)){
+                            Row(Modifier.weight(1.6f)){
                                 TextFieldOutlined(desc = "Amount", amountBuyingState)
                             }
                         }
-                        Text("Item Selling")
+                        Spacer(Modifier.padding(4.dp))
+                        Text("Item Selling",style=MaterialTheme.typography.subtitle2)
                         Row(Modifier.fillMaxWidth()){
                             Row(Modifier.weight(3f)){
                                 TextFieldOutlined(desc = "Name Item", itemSellingState)
                             }
-                            Row(Modifier.weight(1.4f)){
+                            Row(Modifier.weight(1.6f)){
                                 TextFieldOutlined(desc = "Amount", amountSellingState)
                             }
                         }
-                        Spacer(modifier = Modifier.padding(3.dp))
                     }
                 },
                 confirmButton ={
-                    ButtonClickItem(desc = save, onClick = {
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        addVM.saveTrading(
-                            Trading(
-                                _id= trading?._id.toString(),
-                                title=titleState.text,
-                                desc = descState.text,
-                                itemBuying = itemBuyingState.text,
-                                amountBuying = amountBuyingState.text,
-                                itemSelling = itemSellingState.text,
-                                amountSelling= amountSellingState.text
-                            )
-                        )
-                        addVM.getAllTrading()
-                        openDialog= false },warna=MaterialTheme.colors.onSurface,colors=ButtonDefaults.buttonColors(MaterialTheme.colors.onError))},
-                dismissButton = {
-                    ButtonClickItem(desc = cancel, onClick = { openDialog= false
-                        addVM.getAllTrading() },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.error))
-                }
+                    Text(save,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = {
+                                authVM.isLoggedIn()
+                                authVM.authenticateApi(
+                                    authVM.usernamevm ?: "",
+                                    authVM.passwordvm ?: ""
+                                )
+                                addVM.saveTrading(
+                                    Trading(
+                                        _id = trading?._id.toString(),
+                                        title = titleState.text,
+                                        desc = descState.text,
+                                        itemBuying = itemBuyingState.text,
+                                        amountBuying = amountBuyingState.text,
+                                        itemSelling = itemSellingState.text,
+                                        amountSelling = amountSellingState.text
+                                    )
+                                )
+                                addVM.getAllTrading()
+                                openDialog = false
+                            }),color=MaterialTheme.colors.primary,style=MaterialTheme.typography.subtitle2)},
+                   dismissButton = {
+                       Text(cancel,
+                           Modifier
+                               .padding(8.dp)
+                               .clickable(onClick = {
+                                   openDialog = false
+                               }),color=Color.Red,style=MaterialTheme.typography.subtitle2)
+                  }
             )
         }
     }
 }
 @Composable
 fun SaveDropDialog(onClick: () -> Unit){
-    Column() {
+    Column {
         var openDialog by remember { mutableStateOf(true)}
         val homeVM = hiltViewModel<HomeViewModel>()
         val idState = remember { TextFieldState() }
@@ -653,13 +719,13 @@ fun SaveDropDialog(onClick: () -> Unit){
         val authVM= hiltViewModel<AuthViewModel>()
         if(openDialog){
             AlertDialog(
+                backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest=onClick,
-                title = { Text(text = "Dropped") },
+                title = { Text(text = "Dropped",style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) },
                 text = {
                     Column(
                         Modifier
-                            .padding(top = 24.dp, bottom = 12.dp, start = 6.dp, end = 6.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = CenterHorizontally
                     ){
@@ -681,43 +747,57 @@ fun SaveDropDialog(onClick: () -> Unit){
                     }
                 },
                 confirmButton ={
-                    ButtonClickItem(desc = save, onClick = {
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        homeVM.saveDrop(
-                            Dropped(
-                                roleState.text,
-                                nameState.text,
-                                durationState.text,
-                                dayState.text,
-                                idState.text
-                            )
-                        )
-                        homeVM.getDropList()
-                        openDialog=false
-                    },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.onError))},
-                dismissButton = {
-                    ButtonClickItem(desc = "Delete", onClick = {
-                        openDialog= false
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        homeVM.deleteDrop(Dropped(
-                            role=roleState.text,
-                            name=nameState.text,
-                            duration=durationState.text,
-                            day=dayState.text,
-                            _id=idState.text
-                        ))
-                        homeVM.getDropList()
-                    },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.error))
-                }
+                    Text(save,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = {
+                                authVM.isLoggedIn()
+                                authVM.authenticateApi(
+                                    authVM.usernamevm ?: "",
+                                    authVM.passwordvm ?: ""
+                                )
+                                homeVM.saveDrop(
+                                    Dropped(
+                                        roleState.text,
+                                        nameState.text,
+                                        durationState.text,
+                                        dayState.text,
+                                        idState.text
+                                    )
+                                )
+                                homeVM.getDropList()
+                                openDialog = false
+                            }),style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.primary)},
+                    dismissButton = {
+                        Text("Delete",
+                            Modifier
+                                .padding(8.dp)
+                                .clickable(onClick = {
+                                    openDialog = false
+                                    authVM.isLoggedIn()
+                                    authVM.authenticateApi(
+                                        authVM.usernamevm ?: "",
+                                        authVM.passwordvm ?: ""
+                                    )
+                                    homeVM.deleteDrop(
+                                        Dropped(
+                                            role = roleState.text,
+                                            name = nameState.text,
+                                            duration = durationState.text,
+                                            day = dayState.text,
+                                            _id = idState.text
+                                        )
+                                    )
+                                    homeVM.getDropList()
+                                }), color = Color.Red, style = MaterialTheme.typography.subtitle2)
+                    }
             )
         }
     }
 }
 @Composable
 fun SavePartyDialog(party:Party){
-    Column() {
+    Column {
         var openDialog by remember { mutableStateOf(true)}
         val homeVM = hiltViewModel<HomeViewModel>()
         val authVM = hiltViewModel<AuthViewModel>()
@@ -729,17 +809,17 @@ fun SavePartyDialog(party:Party){
         val statusState = remember { TextFieldState(party.status) }
         if(openDialog){
             AlertDialog(
+                backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest={openDialog = false},
                 title = { Text(text = "Party") },
                 text = {
                     Column(
                         Modifier
-                            .padding(top = 24.dp, bottom = 12.dp, start = 6.dp, end = 6.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = CenterHorizontally
                     ) {
-                        ButtonClickItem(desc = "Close", onClick = { openDialog= false},warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.surface))
+                        ButtonClickItem(desc = "Close", onClick = { openDialog= false},bordercolor = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.surface))
                         Row(Modifier.fillMaxWidth()){
                             Row(Modifier.weight(1f)){
                                 TextFieldOutlined(desc = "id", idState)}
@@ -759,57 +839,74 @@ fun SavePartyDialog(party:Party){
                     }
                 },
                 confirmButton ={
-                    ButtonClickItem(
-                        desc = save,
-                        onClick = {
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        homeVM.saveParty(
-                            Party(
-                                role=roleState.text,
-                                no=noState.text,
-                                name=nameState.text,
-                                duration=durationState.text,
-                                status=statusState.text,
-                                _id=idState.text
-                            )
-                        )
-                        homeVM.getPartyList()
-                            openDialog=false
-                                  },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.onError))},
+                    Text(save,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = {
+                                authVM.isLoggedIn()
+                                authVM.authenticateApi(
+                                    authVM.usernamevm ?: "",
+                                    authVM.passwordvm ?: ""
+                                )
+                                homeVM.saveParty(
+                                    Party(
+                                        role = roleState.text,
+                                        no = noState.text,
+                                        name = nameState.text,
+                                        duration = durationState.text,
+                                        status = statusState.text,
+                                        _id = idState.text
+                                    )
+                                )
+                                homeVM.getPartyList()
+                                openDialog = false
+                            }),
+                        style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.primary)},
                 dismissButton = {
-                    ButtonClickItem(desc = awal, onClick = {
-                        authVM.isLoggedIn()
-                        authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
-                        homeVM.saveParty(
-                            Party(
-                                role=roleState.text,
-                                no=noState.text,
-                                name=nameState.text,
-                                duration=durationState.text,
-                                status=statusState.text,
-                                check=listOf(),
-                                nope=listOf(),
-                                drop=listOf(),
-                                _id=idState.text
-                            )
-                        )
-                        homeVM.getPartyList()
-                        openDialog= false },warna = MaterialTheme.colors.onSurface,colors = ButtonDefaults.buttonColors(MaterialTheme.colors.error))
+                    Text(awal,
+                        Modifier
+                            .padding(8.dp)
+                            .clickable(onClick = {
+                                authVM.isLoggedIn()
+                                authVM.authenticateApi(
+                                    authVM.usernamevm ?: "",
+                                    authVM.passwordvm ?: ""
+                                )
+                                homeVM.saveParty(
+                                    Party(
+                                        role = roleState.text,
+                                        no = noState.text,
+                                        name = nameState.text,
+                                        duration = durationState.text,
+                                        status = statusState.text,
+                                        check = listOf(),
+                                        nope = listOf(),
+                                        drop = listOf(),
+                                        _id = idState.text
+                                    )
+                                )
+                                homeVM.getPartyList()
+                                openDialog = false
+                            }),style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.primary)
                 }
             )
         }
     }
 }
 @Composable
-fun ObserveUserList(onClick: () -> Unit){
+fun ObserveUserList(onClick: () -> kotlin.Unit,navController: NavHostController){
     val homeVM = hiltViewModel<HomeViewModel>()
-    var userList = listOf<User>()
+    val userList = mutableListOf<User>()
     val listUserState = homeVM.listUserStatus.observeAsState()
     listUserState.value?.let {
         when (it.status) {
             Status.SUCCESS -> {
-                userList= it.data ?: return@let
+                it.data?.let {listUser ->
+                    userList.clear()
+                    listUser.forEach { user ->
+                        userList.add(user)
+                    }
+                }  ?: userList.clear()
             }
             Status.ERROR -> {
                 Toast.makeText(
@@ -824,31 +921,30 @@ fun ObserveUserList(onClick: () -> Unit){
     }
     Row(modifier = Modifier
         .fillMaxSize()
-        .padding(6.dp),
+        .padding(8.dp),
         Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Column {
+        Column(verticalArrangement = Arrangement.Center) {
             userList.forEach {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(1f)
-                        .padding(12.dp),
+                        .padding(8.dp),
                     shape= RoundedCornerShape(8.dp),
-                    backgroundColor = MaterialTheme.colors.primaryVariant
+                    backgroundColor = MaterialTheme.colors.secondary
                 ){
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(6.dp),
+                            .padding(8.dp),
                         Arrangement.SpaceBetween
                     ){
-                        TwoTextItem(text1 = it.username, text2 = it.name.toString())
-                        TwoTextItem(text1 = it.ign.toString(), text2 = it.clubName.toString())
+                        HeaderCardItem(text1 = it.ign.toString(), text2 = it.username, text3 = it.clubName.toString(), navController = navController)
                     }
                 }
             }
-            ButtonClickItem(desc = "Close", onClick = onClick)
+            Text("CLOSE",style=MaterialTheme.typography.subtitle2,color=Color.Red)
         }
     }
 }
@@ -879,8 +975,10 @@ fun DropDownListItem(
             TextFieldOutlined(desc = desc,state)
             DropdownMenu(
                 modifier= Modifier
-                    .fillMaxHeight(0.6f)
-                    .align(CenterHorizontally),
+                    .background(MaterialTheme.colors.secondary)
+                    .align(CenterHorizontally)
+                    .fillMaxHeight(0.5f)
+                    .fillMaxWidth(0.7f),
                 expanded = isOpen.value,
                 onDismissRequest = { openCloseOfDropDownList(false) }
             ) {
@@ -915,6 +1013,32 @@ fun TermTextItem(title:String,desc:String){
         Text(title)
         Text(desc,textAlign= TextAlign.Justify)
         Spacer(modifier = Modifier.padding(6.dp))
+    }
+}
+@Composable
+fun AdvertView(modifier: Modifier = Modifier) {
+    val isInEditMode = LocalInspectionMode.current
+    if (isInEditMode) {
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(Color.Red)
+                .padding(horizontal = 2.dp, vertical = 6.dp),
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            text = "Advert Here",
+        )
+    } else {
+        AndroidView(
+            modifier = modifier.fillMaxWidth(),
+            factory = { context ->
+                AdView(context).apply {
+                    adSize = AdSize.BANNER
+                    adUnitId = "ca-app-pub-3940256099942544/6300978111"
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
     }
 }
 //Row(

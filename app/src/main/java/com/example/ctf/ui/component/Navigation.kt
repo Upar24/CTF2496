@@ -32,16 +32,9 @@ import com.example.ctf.util.listString.darkmodestring
 
 @Composable
 fun CTFAppTopNavigation(
-    onIconClick: () -> Unit,
-    navController: NavHostController
+    onIconClick: () -> Unit
 ) {
-    Row(
-        Modifier.padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        TopBarItem(onIconClick)
-    }
+    TopBarItem(onIconClick)
 }
 
 
@@ -107,23 +100,18 @@ fun AppdrawerBody(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(16.dp)
                 .clickable {
                     navigateRouteFunction(navController, item.route)
                     closeDrawerAction()
-                }
-                .height(27.dp),
+                },
             verticalAlignment = Alignment.CenterVertically
         ){
-            Image(
-                painter = painterResource(item.icon),
-                contentDescription = "apa aj",
-                modifier = Modifier
-                    .height(36.dp))
+            Icon(painter = painterResource(id = item.icon), contentDescription = "",tint=MaterialTheme.colors.primaryVariant)
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 text = stringResource(item.resourceId),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.body2
             )
         }
     }
@@ -191,13 +179,13 @@ fun CTFAppBottomNavigation(
         items.forEach{screen ->
             BottomNavigationItem(
                 icon= { Icon(imageVector = screen.icon, contentDescription = "",
-                    tint=MaterialTheme.colors.primaryVariant
+                    tint=MaterialTheme.colors.primary
                 )},
                 label={
                     Text(
                         stringResource(id = screen.resourceId),
-                        color= MaterialTheme.colors.onPrimary,
-                        fontSize = 18.sp,fontWeight = FontWeight.Bold
+                        color= MaterialTheme.colors.onBackground,
+                        style=MaterialTheme.typography.body1
                     )
                 },
                 selected = currentRoute==screen.route,

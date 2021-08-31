@@ -9,7 +9,6 @@ import com.example.ctf.data.remote.requests.OneRequest
 import com.example.ctf.data.remote.requests.UpdateUserRequest
 import com.example.ctf.util.Resource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -307,6 +306,18 @@ class CTFRepository @Inject constructor(
         }catch (e:Exception){
             Resource.error("Couldnt connect to the server",null)
         }  }
+    suspend fun deletion()= withContext(Dispatchers.IO){
+        try {
+            val response=ctfApi.deletion()
+            if(response.isSuccessful){
+                Resource.success(response.body()?.message)
+            }else{
+                Resource.error(response.message(),null)
+            }
+        }catch (e:Exception){
+            Resource.error("Couldnt connect to the server",null)
+        }
+    }
     suspend fun toggleCheck(party: Party)= withContext(Dispatchers.IO){
         try {
             val response=ctfApi.toggleCheck(party)

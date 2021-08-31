@@ -1,11 +1,11 @@
 package com.example.ctf.ui.add
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -22,7 +21,6 @@ import com.example.ctf.data.local.entities.Trading
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
 import com.example.ctf.util.Status
-import com.example.ctf.util.listString
 import com.example.ctf.util.listString.all
 import com.example.ctf.util.listString.buying
 import com.example.ctf.util.listString.search
@@ -41,7 +39,7 @@ fun AddScreen(navController: NavHostController){
         val addVM = hiltViewModel<AddViewModel>()
         val authVM = hiltViewModel<AuthViewModel>()
         val username = getUsernameLoginFunction()
-        var visibleScreen by remember { mutableStateOf(buying) }
+        var visibleScreen by remember { mutableStateOf("") }
         val queryState = remember { TextFieldState() }
         val allTradingList = mutableListOf<Trading>()
         val titleTradingList = mutableListOf<Trading>()
@@ -90,14 +88,8 @@ fun AddScreen(navController: NavHostController){
                 Status.SUCCESS -> {
                     it.data?.let {listTrading->
                         allTradingList.clear()
-                        titleTradingList.clear()
-                        buyingTradingList.clear()
-                        sellingTradingList.clear()
                         listTrading.forEach { trading ->
                             allTradingList.add(trading)
-                            titleTradingList.add(trading)
-                            buyingTradingList.add(trading)
-                            sellingTradingList.add(trading)
                         }
                     }
                 }
@@ -158,8 +150,10 @@ fun AddScreen(navController: NavHostController){
                 }
             }
         }
+        AdvertView()
+        Spacer(Modifier.padding(24.dp))
         TextFieldOutlined(desc = search,queryState)
-        Spacer(modifier = Modifier.padding(6.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
         Row (Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
@@ -168,38 +162,31 @@ fun AddScreen(navController: NavHostController){
             ButtonClickItem(
                 desc = buying, onClick = {
                     visibleScreen = buying
-                    if(queryState.text.isEmpty()){
-                        addVM.getAllTrading()}
-                    else{
-                        addVM.getBuyingSearch(queryState.text)
-                    }
-                },warna=if(visibleScreen== buying)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    addVM.getBuyingSearch(queryState.text)
+                },
+                bordercolor= if(visibleScreen== buying)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==buying)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
                 desc = all, onClick = {
                     visibleScreen = all
                     addVM.getAllTrading()
-                },warna=if(visibleScreen== all)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                },bordercolor= if(visibleScreen== all)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==all)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
                 desc = title, onClick = {
                     visibleScreen = title
-                    if(queryState.text.isEmpty()){
-                        addVM.getAllTrading()
-                    }
-                    else{
-                        addVM.getTitleSearch(queryState.text) }
-                },warna=if(visibleScreen== title)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    addVM.getTitleSearch(queryState.text)
+                },bordercolor= if(visibleScreen== title)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==title)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
                 desc =selling, onClick = {
                     visibleScreen = selling
-                    if(queryState.text.isEmpty()){
-                        addVM.getAllTrading()
-                    }
-                    else{
-                        addVM.getSellingSearch(queryState.text) }
-                },warna=if(visibleScreen== selling)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    addVM.getSellingSearch(queryState.text)
+                },bordercolor= if(visibleScreen== selling)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==selling)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
         }
         DividerItem()
@@ -215,7 +202,7 @@ fun AddScreen(navController: NavHostController){
             listDisplay.forEach { trading1 ->
                 Card(
                     Modifier.fillMaxWidth(),
-                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                    border = BorderStroke(1.dp, MaterialTheme.colors.primaryVariant),
                     shape = RoundedCornerShape(8.dp),
                     backgroundColor = MaterialTheme.colors.secondary
                 ){
@@ -233,7 +220,7 @@ fun AddScreen(navController: NavHostController){
                         },navController
                     )
                 }
-                Spacer(modifier = Modifier.padding(3.dp))
+                Spacer(modifier = Modifier.padding(4.dp))
             }
         }
 

@@ -2,7 +2,6 @@ package com.example.ctf.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -13,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -42,9 +40,9 @@ sealed class DrawerNavigationScreens(
     @StringRes val resourceId:Int,
     val icon: Int
 ){
-    object TipsTricks:DrawerNavigationScreens("TipsTricks",R.string.tipstricks_screen_route, R.drawable.lamp)
-    object Dictionary:DrawerNavigationScreens("Dictionary",R.string.dictionary_screen_route, R.drawable.kamus)
-    object Support:DrawerNavigationScreens("Support",R.string.support_screen_route, R.drawable.support)
+    object TipsTricks:DrawerNavigationScreens("TipsTricks",R.string.tipstricks_screen_route, R.drawable.ic_lamp)
+    object Dictionary:DrawerNavigationScreens("Dictionary",R.string.dictionary_screen_route, R.drawable.ic_dictionary)
+    object Support:DrawerNavigationScreens("Support",R.string.support_screen_route, R.drawable.ic_support)
 }
 sealed class BottomNavigationScreens(
     val route:String,
@@ -74,7 +72,6 @@ fun MainScreen(){
         Card(
             modifier = Modifier
                 .fillMaxSize(1f),
-            shape= RoundedCornerShape(8.dp),
             backgroundColor = MaterialTheme.colors.background){
             val navController: NavHostController = rememberNavController()
             val scaffoldState: ScaffoldState = rememberScaffoldState()
@@ -100,8 +97,7 @@ fun MainScreen(){
                                 scaffoldState.drawerState.open()
                             }
                             authVM.getDesc()
-                        },
-                        navController
+                        }
                     )
                 },
                 scaffoldState=scaffoldState,
@@ -134,7 +130,7 @@ fun MainScreenNavigationConfiguration(
             HomeScreen(navController)
         }
         composable("Party"){
-            PartyScreen()
+            PartyScreen(navController)
         }
         composable(BottomNavigationScreens.OtherProfile.route + "/{username}",arguments = listOf(
             navArgument("username"){

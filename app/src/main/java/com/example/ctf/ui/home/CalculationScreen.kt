@@ -34,10 +34,7 @@ import java.util.*
 fun CalculationScreen() {
     val listCalc = listOf(dvp, upgrade, ts, maxplunder)
     var visibleCalc by remember { mutableStateOf(dvp) }
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp),verticalArrangement = Arrangement.Center) {
+    Column(Modifier.fillMaxWidth()){
         var tabIndex by remember { mutableStateOf(0) }
 
         ScrollableTabRow(
@@ -50,10 +47,9 @@ fun CalculationScreen() {
                     visibleCalc = text
                 }, text = {
                     Text(
-                        text, Modifier
-                            .padding(6.dp),
-                        style = if (visibleCalc == text) MaterialTheme.typography.button else MaterialTheme.typography.body2,
-                        color = if (visibleCalc == text) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSecondary
+                        text,
+                        style = if (visibleCalc == text) MaterialTheme.typography.h2 else MaterialTheme.typography.button,
+                        color = if (visibleCalc == text) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                     )
                 })
             }
@@ -73,42 +69,46 @@ fun DvpDisplay(){
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally){
+            .padding(top = 32.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally){
         var visibleDvp by remember { mutableStateOf("") }
         var textString by remember { mutableStateOf("")}
-        val initState = remember { TextFieldState("0") }
-        val limitState = remember { TextFieldState("0") }
-        Spacer(Modifier.padding(6.dp))
+        val initState = remember { TextFieldState("") }
+        val limitState = remember { TextFieldState("") }
         EditTextItem(desc = init,state =initState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        Spacer(Modifier.padding(3.dp))
+        Spacer(Modifier.padding(8.dp))
         EditTextItem(desc = limit,state =limitState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        Spacer(Modifier.padding(6.dp))
-        Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceAround,verticalAlignment = Alignment.CenterVertically){
+        Spacer(Modifier.padding(16.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween,verticalAlignment = Alignment.CenterVertically){
             ButtonClickItem(
                 desc = volley,
                 onClick = {
-                visibleDvp= volley
-                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"A")},
-                warna=if(visibleDvp==volley)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    visibleDvp= volley
+                    textString=if(initState.text.isEmpty() || limitState.text.isEmpty())"Please fill both of the fields" else
+                        hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"A")},
+                bordercolor= if(visibleDvp==volley)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleDvp==volley)ButtonDefaults.buttonColors( MaterialTheme.colors.background ) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
+            Spacer(Modifier.padding(8.dp))
             ButtonClickItem(
                 desc = interest,
                 onClick = {
-                visibleDvp= interest
-                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"B")},
-                warna=if(visibleDvp==interest)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    visibleDvp= interest
+                    textString=if(initState.text.isEmpty() || limitState.text.isEmpty())"Please fill both of the fields" else hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"B")},
+                bordercolor= if(visibleDvp==interest)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleDvp==interest)ButtonDefaults.buttonColors( MaterialTheme.colors.background ) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
+            Spacer(Modifier.padding(8.dp))
             ButtonClickItem(
                 desc = result,
                 onClick = {
-                visibleDvp= result
-                textString=hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"C")},
-                warna=if(visibleDvp==result)MaterialTheme.colors.primaryVariant else MaterialTheme.colors.onSurface
+                    visibleDvp= result
+                    textString=if(initState.text.isEmpty() || limitState.text.isEmpty())"Please fill both of the fields" else hoppingValueFunction(initState.text.filter { it.isLetterOrDigit()}.toLong(),limitState.text.filter { it.isLetterOrDigit()}.toLong(),"C")},
+                bordercolor= if(visibleDvp==result)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleDvp==result)ButtonDefaults.buttonColors( MaterialTheme.colors.background ) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
         }
-        Spacer(modifier = Modifier.padding(6.dp))
-        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
-        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(textString,color = MaterialTheme.colors.primaryVariant,style = MaterialTheme.typography.h2)
 
     }
 }
@@ -117,22 +117,21 @@ fun UpgradeDisplay(){
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(top = 32.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
-        val currentStatusState = remember { TextFieldState("0") }
+        val currentStatusState = remember { TextFieldState("") }
         val dropDormState = remember { TextFieldState(nope) }
         val hireDormState = remember { TextFieldState(nope) }
-
-        Spacer(modifier = Modifier.padding(6.dp))
         EditTextItem(desc = "Current Status",state = currentStatusState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
+        Spacer(Modifier.padding(8.dp))
         DropDownListItem(desc = "Drop a dormmate?",dropDormState)
+        Spacer(Modifier.padding(8.dp))
         DropDownListItem(desc = "Hiring a dormmate?",hireDormState)
-        Spacer(modifier = Modifier.padding(6.dp))
-        ButtonClickItem(desc = "Calculate", onClick = { textString= upgradeFunction(currentStatusState.text.filter { it.isLetterOrDigit()}.toLong(),
+        Spacer(modifier = Modifier.padding(16.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= if(currentStatusState.text.isEmpty())"Please the the field" else upgradeFunction(currentStatusState.text.filter { it.isLetterOrDigit()}.toLong(),
             valueOfTheTier(dropDormState.text), valueOfTheTier(hireDormState.text)) })
-        Spacer(modifier = Modifier.padding(6.dp))
-        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
-        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(textString,color = MaterialTheme.colors.primaryVariant,style = MaterialTheme.typography.h2)
     }
 }
 @Composable
@@ -140,16 +139,14 @@ fun TSDisplay(){
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(top = 32.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
-        val tsStatus = remember { TextFieldState("0") }
-        Spacer(modifier = Modifier.padding(6.dp))
+        val tsStatus = remember { TextFieldState("") }
         EditTextItem(desc = "Current Status",state = tsStatus,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        Spacer(modifier = Modifier.padding(6.dp))
-        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(tsStatus.text.filter { it.isLetterOrDigit()}.toLong(),ts) })
-        Spacer(modifier = Modifier.padding(6.dp))
-        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
-        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
+        Spacer(modifier = Modifier.padding(16.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= if(tsStatus.text.isEmpty())"Please the the field" else tsmaxplunder(tsStatus.text.filter { it.isLetterOrDigit()}.toLong(),ts) })
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(textString,color = MaterialTheme.colors.primaryVariant,style = MaterialTheme.typography.h2)
     }
 }
 @Composable
@@ -157,16 +154,14 @@ fun MaxPlunderDisplay(){
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(top = 32.dp),verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
         var textString by remember { mutableStateOf("")}
-        val statusState = remember { TextFieldState("0") }
-        Spacer(modifier = Modifier.padding(6.dp))
+        val statusState = remember { TextFieldState("") }
         EditTextItem(desc = "Current Status",state = statusState,keyboard = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number))
-        Spacer(modifier = Modifier.padding(6.dp))
-        ButtonClickItem(desc = "Calculate", onClick = { textString= tsmaxplunder(statusState.text.filter { it.isLetterOrDigit()}.toLong(),
+        Spacer(modifier = Modifier.padding(16.dp))
+        ButtonClickItem(desc = "Calculate", onClick = { textString= if(statusState.text.isEmpty())"Please the the field" else tsmaxplunder(statusState.text.filter { it.isLetterOrDigit()}.toLong(),
             maxplunder) })
-        Spacer(modifier = Modifier.padding(6.dp))
-        val result =if(!textString.isEmpty())NumberFormat.getNumberInstance(Locale.US).format(textString.toLong()) else "0"
-        Text(result,color = MaterialTheme.colors.secondaryVariant,style = MaterialTheme.typography.button)
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(textString,color = MaterialTheme.colors.primaryVariant,style = MaterialTheme.typography.h2)
     }
 }

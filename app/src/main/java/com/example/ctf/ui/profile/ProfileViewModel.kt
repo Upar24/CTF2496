@@ -36,6 +36,8 @@ class ProfileViewModel @Inject constructor(
     val listUserClubStatus:LiveData<Resource<List<User>>> = _listUserClubStatus
     private val _listUserIgnStatus = MutableLiveData<Resource<List<User>>>()
     val listUserIgnStatus:LiveData<Resource<List<User>>> = _listUserIgnStatus
+    private val _deletionStatus = MutableLiveData<Resource<String>>()
+    val deletionStatus : LiveData<Resource<String>> = _deletionStatus
 
 
     fun getUser(username:String){
@@ -77,6 +79,13 @@ class ProfileViewModel @Inject constructor(
             val result=repository.deleteWall(wall)
             _deleteWallStatus.postValue(Event(result))
             getWall(username)
+        }
+    }
+    fun deletion(){
+        _deletionStatus.postValue(Resource.loading(null))
+        viewModelScope.launch {
+            val result= repository.deletion()
+            _deletionStatus.postValue(result)
         }
     }
     fun listUserClub(club:String){

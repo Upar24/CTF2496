@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -33,7 +34,9 @@ fun SearchScreen(navController: NavHostController){
     Column(
         Modifier
             .fillMaxSize()
-            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp),horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp),horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AdvertView()
         val profileVM = hiltViewModel<ProfileViewModel>()
         var userSearch by remember{mutableStateOf(User("","No user found",""))}
         val userIgnList = mutableListOf<User>()
@@ -41,23 +44,31 @@ fun SearchScreen(navController: NavHostController){
         var visibleScreen by remember { mutableStateOf("") }
 
         val searchState = remember { TextFieldState("") }
+        Spacer(Modifier.padding(24.dp))
         TextFieldOutlined(desc = search,searchState)
-        Spacer(Modifier.padding(6.dp))
-        Text("Search for")
-        Spacer(Modifier.padding(3.dp))
+        Spacer(Modifier.padding(8.dp))
+        Text("Search for",style=MaterialTheme.typography.body1)
+        Spacer(Modifier.padding(8.dp))
         Row(Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.SpaceAround){
-
             ButtonClickItem(desc = ign, onClick = {
                 profileVM.listUserIgn(searchState.text)
-                visibleScreen = ign })
+                visibleScreen = ign },
+                bordercolor = if(visibleScreen==ign)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==ign) ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+            )
             ButtonClickItem(desc = username, onClick = {
                 userSearch=User("","","")
                 profileVM.getUser(searchState.text)
-                visibleScreen = username
-            })
+                visibleScreen = username},
+                bordercolor = if(visibleScreen==username)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==username) ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+            )
             ButtonClickItem(desc = club, onClick = {
                 profileVM.listUserClub(searchState.text)
-                visibleScreen = club })
+                visibleScreen = club },
+                bordercolor = if(visibleScreen==club)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==club) ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+            )
         }
         DividerItem()
         val userState= profileVM.user.observeAsState()

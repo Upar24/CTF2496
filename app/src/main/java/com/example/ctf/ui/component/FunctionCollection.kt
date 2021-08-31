@@ -1,11 +1,15 @@
 package com.example.ctf.ui.component
 
-import androidx.compose.runtime.Composable
+import  androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import com.example.ctf.data.local.entities.Trading
+import com.example.ctf.repository.CTFRepository
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.util.Constants.BUYING_RATE
 import com.example.ctf.util.Constants.INTEREST_RATE
@@ -57,6 +61,9 @@ import com.example.ctf.util.listString.T9L3
 import com.example.ctf.util.listString.T9L4
 import com.example.ctf.util.listString.nope
 import com.example.ctf.util.listString.ts
+import java.text.NumberFormat
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.roundToLong
 
 class TextFieldState(string: String=""){
@@ -65,7 +72,12 @@ class TextFieldState(string: String=""){
 fun getTimePost(timePost:Long):String{
     val endTime= System.currentTimeMillis()
     val diff= (endTime - timePost) / 1000
-    return if(diff >= 86400) "${diff/86400} day(s)" else if(diff >= 3600) "${diff/3600} hour(s)" else if(diff >= 60) "${diff/60} minute(s)" else "${diff} second(s)"
+    var date= ""
+    if(diff >= 86400){date=if((diff<172799)) "1 day" else "${NumberFormat.getNumberInstance().format(diff/86400)} days"}
+    else if(diff >= 3600){date=if((diff<7199))"1 hour" else "${NumberFormat.getNumberInstance().format(diff/3600)} hours"}
+    else if(diff >= 60) {date=if((diff<119))"1 minute" else "${NumberFormat.getNumberInstance().format(diff/60)} minutes"}
+    else date=if((diff == 1.toLong()))"1 second" else "${NumberFormat.getNumberInstance().format(diff)} seconds"
+    return date
 }
 @Composable
 fun getUsernameLoginFunction():String{
@@ -108,10 +120,12 @@ fun hoppingValueFunction(init:Long,limit:Long,request:String):String{
             }
         }
     }
-    return if(request =="A") "$hoppingTimes" else if(request=="B") "$interest" else "$initValue"
+
+    return if(request =="A") NumberFormat.getNumberInstance().format(hoppingTimes)
+    else if(request=="B") NumberFormat.getNumberInstance().format(interest) else NumberFormat.getNumberInstance().format(initValue)
 }
 fun upgradeFunction(current:Long,drop:Long,hire:Long):String{
-    return (current - drop + hire).toString()
+    return NumberFormat.getNumberInstance().format(current - drop + hire)
 }
 fun valueOfTheTier(tier:String):Long {
     val value: Long
@@ -167,5 +181,5 @@ fun valueOfTheTier(tier:String):Long {
     return value
 }
 fun tsmaxplunder(tsValue:Long,request: String):String{
-    return if(request== ts) "${tsValue * 6}" else "${(tsValue * 0.5).roundToLong()}"
+    return if(request== ts) NumberFormat.getNumberInstance().format(tsValue * 6) else NumberFormat.getNumberInstance().format(tsValue * 0.5)
 }
