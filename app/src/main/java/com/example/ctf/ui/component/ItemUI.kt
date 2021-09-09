@@ -1,9 +1,5 @@
 package com.example.ctf.ui.component
 
-import android.app.Activity
-import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -29,7 +25,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +38,7 @@ import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.home.HomeViewModel
 import com.example.ctf.ui.profile.ProfileViewModel
 import com.example.ctf.util.Status
+import com.example.ctf.util.listString.NO_USERNAME
 import com.example.ctf.util.listString.T10L1
 import com.example.ctf.util.listString.T10L2
 import com.example.ctf.util.listString.T10L3
@@ -89,7 +85,6 @@ import com.example.ctf.util.listString.T9L3
 import com.example.ctf.util.listString.T9L4
 import com.example.ctf.util.listString.awal
 import com.example.ctf.util.listString.cancel
-import com.example.ctf.util.listString.editprofile
 import com.example.ctf.util.listString.nope
 import com.example.ctf.util.listString.pleasewait
 import com.example.ctf.util.listString.reguler
@@ -99,18 +94,13 @@ import com.example.ctf.util.listString.ultra
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.NumberFormat
 import java.util.*
-import javax.inject.Inject
 
 @Composable
 fun ProfileInfoItem(number:String,desc:String){
     Column(
-        horizontalAlignment = CenterHorizontally,
+        horizontalAlignment =Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween
     ){
         Text(
@@ -157,13 +147,15 @@ fun SwitchTOLoginOrRegisterTexts(modifier: Modifier,text1: String,text2: String,
 @Composable
 fun TextFieldOutlined(desc:String,state: TextFieldState = remember {TextFieldState()}){
     OutlinedTextField(
-        label={Text(text=desc,style=MaterialTheme.typography.body1)},
+        label={Text(text=desc,style=MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)},
         value =state.text,
         onValueChange = {
             state.text = it
         },
         textStyle = MaterialTheme.typography.body2,
-        shape=RoundedCornerShape(8.dp)
+        shape=RoundedCornerShape(8.dp),
+        maxLines=7,
+        colors = TextFieldDefaults.outlinedTextFieldColors(textColor = MaterialTheme.colors.onBackground)
     )
 }
 //lam9
@@ -182,6 +174,7 @@ fun EditTextStringItem(state: TextFieldState = remember {TextFieldState()},text:
             disabledIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
+        maxLines=7
 
         )
 }
@@ -206,7 +199,8 @@ fun EditTextItem(modifier: Modifier=Modifier, desc: String, state: TextFieldStat
             disabledIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
-        textStyle=MaterialTheme.typography.body2
+        textStyle=MaterialTheme.typography.body2,
+        maxLines=7
     )
 }
 @Composable
@@ -241,7 +235,7 @@ fun CardDrop(dropped: Dropped){
         ){
             Text("Day ${dropped.day}",style=MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
             Text(dropped.name,style = MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
-            Text("${dropped.duration} hrs",style = MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
+            Text(dropped.duration,style = MaterialTheme.typography.body1,color=MaterialTheme.colors.onBackground)
         }
     }
 }
@@ -364,7 +358,7 @@ fun TradingCard(username:String, trading: Trading, editClick: () -> Unit, delete
 @Composable
 fun TwoTextItem(text1:String,text2:String){
     Column {
-        Text(text1, color=MaterialTheme.colors.onBackground,style = MaterialTheme.typography.subtitle2)
+        Text(text1,color=MaterialTheme.colors.onBackground,style = MaterialTheme.typography.subtitle2)
         Text(text2,color=MaterialTheme.colors.onBackground,textAlign = TextAlign.Justify,style=MaterialTheme.typography.body2)
     }
 }
@@ -406,9 +400,9 @@ fun WallCard(wall: Wall?, onWall: () -> Unit, onDelete:() ->Unit,navController: 
                     Row(Modifier.weight(5f),Arrangement.Start,verticalAlignment=Alignment.CenterVertically){
                         it.chat?.let { it1 -> Text(it1,style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground) }}
                     Row(Modifier.weight(1f),Arrangement.Center,verticalAlignment=Alignment.CenterVertically){
-                        if((getUsernameLoginFunction()==it.wallOwner)) SvgItemClick(icon = R.drawable.ic_reply,onWall)}
+                        if(getUsernameLoginFunction() != it.username || it.wallOwner != it.username) SvgItemClick(icon = R.drawable.ic_reply,onWall)}
                     Row(Modifier.weight(1f),Arrangement.Center,verticalAlignment=Alignment.CenterVertically){
-                        if(getUsernameLoginFunction()==it.wallOwner) Icon(
+                        if((getUsernameLoginFunction()==it.wallOwner)) Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "",
                             modifier = Modifier.clickable(onClick = onDelete),
@@ -485,9 +479,11 @@ fun EditProfileDialog(user: User,onClick: () -> Unit,username: String){
                 .fillMaxHeight(0.7f)
                 .padding(8.dp),
             onDismissRequest=onClick,
-            title = {
-                Text(text = editprofile,style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground)
-            },
+            title = { Row(
+                Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+            {Text(text = "EDIT",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
             text = {
                 Column(
                     Modifier
@@ -541,7 +537,7 @@ fun WallList(wallList: List<Wall>, navController: NavHostController, modifier: M
                     authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
                     profileVM.deleteWall(it.wallOwner.toString(),it)},navController
             )
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(modifier = Modifier.padding(2.dp))
         }
     }
 
@@ -559,7 +555,11 @@ fun SaveTodayDialog(today: Today,onClick: () -> Unit){
             AlertDialog(
                 backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest=onClick,
-                title = { Text(text = "POTD",style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) },
+                title = { Row(
+                    Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+                {Text(text = "POTD",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
                 text = {
                     Row(
                         Modifier
@@ -628,28 +628,30 @@ fun AddTradingDialog(trading: Trading? ){
         val itemSellingState = remember { TextFieldState(trading?.itemSelling.toString()) }
         val amountSellingState = remember { TextFieldState(trading?.amountSelling.toString()) }
         val authVM= hiltViewModel<AuthViewModel>()
+        val login : Boolean= getUsernameLoginFunction() == NO_USERNAME
+        val context = LocalContext.current
         if(openDialog){
             AlertDialog(
                 backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest={openDialog = false},
                 title = { Row(
                     Modifier
+                        .padding(8.dp)
                         .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
-                {Text(text = "Trading",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
+                {Text(text = "TRADING",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
                 text = {
                     Column(
                         Modifier
                             .fillMaxHeight()
-                            .padding(8.dp),
+                            .padding(top = 8.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = CenterHorizontally
                     ) {
-                        Spacer(modifier = Modifier.padding(8.dp))
+                        Spacer(modifier = Modifier.padding(4.dp))
                         TextFieldOutlined(desc = "Title", titleState)
-                        Spacer(modifier = Modifier.padding(4.dp))
                         TextFieldOutlined(desc = "Description", descState)
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Text("Item Buying",style=MaterialTheme.typography.subtitle2)
+                        Spacer(Modifier.padding(top=4.dp))
+                        Text("Item Buying",style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
                         Row(Modifier.fillMaxWidth()){
                             Row(Modifier.weight(3f)){
                                 TextFieldOutlined(desc = "Name Item", itemBuyingState)
@@ -658,8 +660,8 @@ fun AddTradingDialog(trading: Trading? ){
                                 TextFieldOutlined(desc = "Amount", amountBuyingState)
                             }
                         }
-                        Spacer(Modifier.padding(4.dp))
-                        Text("Item Selling",style=MaterialTheme.typography.subtitle2)
+                        Spacer(Modifier.padding(top=4.dp))
+                        Text("Item Selling",style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.onBackground)
                         Row(Modifier.fillMaxWidth()){
                             Row(Modifier.weight(3f)){
                                 TextFieldOutlined(desc = "Name Item", itemSellingState)
@@ -675,24 +677,31 @@ fun AddTradingDialog(trading: Trading? ){
                         Modifier
                             .padding(8.dp)
                             .clickable(onClick = {
-                                authVM.isLoggedIn()
-                                authVM.authenticateApi(
-                                    authVM.usernamevm ?: "",
-                                    authVM.passwordvm ?: ""
-                                )
-                                addVM.saveTrading(
-                                    Trading(
-                                        _id = trading?._id.toString(),
-                                        title = titleState.text,
-                                        desc = descState.text,
-                                        itemBuying = itemBuyingState.text,
-                                        amountBuying = amountBuyingState.text,
-                                        itemSelling = itemSellingState.text,
-                                        amountSelling = amountSellingState.text
+                                if (login) {
+                                    Toast
+                                        .makeText(
+                                            context, "Please Login First.", Toast.LENGTH_SHORT,
+                                        )
+                                        .show()
+                                } else {
+                                    authVM.isLoggedIn()
+                                    authVM.authenticateApi(
+                                        authVM.usernamevm ?: "",
+                                        authVM.passwordvm ?: ""
                                     )
-                                )
-                                addVM.getAllTrading()
-                                openDialog = false
+                                    addVM.saveTrading(
+                                        Trading(
+                                            _id = trading?._id.toString(),
+                                            title = titleState.text,
+                                            desc = descState.text,
+                                            itemBuying = itemBuyingState.text,
+                                            amountBuying = amountBuyingState.text,
+                                            itemSelling = itemSellingState.text,
+                                            amountSelling = amountSellingState.text
+                                        )
+                                    )
+                                    openDialog = false
+                                }
                             }),color=MaterialTheme.colors.primary,style=MaterialTheme.typography.subtitle2)},
                    dismissButton = {
                        Text(cancel,
@@ -721,7 +730,11 @@ fun SaveDropDialog(onClick: () -> Unit){
             AlertDialog(
                 backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest=onClick,
-                title = { Text(text = "Dropped",style=MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) },
+                title ={ Row(
+                    Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+                {Text(text = "DROPPED",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
                 text = {
                     Column(
                         Modifier
@@ -811,7 +824,11 @@ fun SavePartyDialog(party:Party){
             AlertDialog(
                 backgroundColor=MaterialTheme.colors.secondary,
                 onDismissRequest={openDialog = false},
-                title = { Text(text = "Party") },
+                title ={ Row(
+                    Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+                {Text(text = "PARTY",style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
                 text = {
                     Column(
                         Modifier
@@ -848,17 +865,19 @@ fun SavePartyDialog(party:Party){
                                     authVM.usernamevm ?: "",
                                     authVM.passwordvm ?: ""
                                 )
-                                homeVM.saveParty(
+                                homeVM.saveParty(party.role,
                                     Party(
                                         role = roleState.text,
                                         no = noState.text,
                                         name = nameState.text,
                                         duration = durationState.text,
                                         status = statusState.text,
+                                        check =party.check,
+                                        nope=party.nope,
+                                        drop=party.drop,
                                         _id = idState.text
                                     )
                                 )
-                                homeVM.getPartyList()
                                 openDialog = false
                             }),
                         style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.primary)},
@@ -872,7 +891,7 @@ fun SavePartyDialog(party:Party){
                                     authVM.usernamevm ?: "",
                                     authVM.passwordvm ?: ""
                                 )
-                                homeVM.saveParty(
+                                homeVM.saveParty(party.role,
                                     Party(
                                         role = roleState.text,
                                         no = noState.text,
@@ -885,7 +904,6 @@ fun SavePartyDialog(party:Party){
                                         _id = idState.text
                                     )
                                 )
-                                homeVM.getPartyList()
                                 openDialog = false
                             }),style=MaterialTheme.typography.subtitle2,color=MaterialTheme.colors.primary)
                 }
@@ -894,7 +912,7 @@ fun SavePartyDialog(party:Party){
     }
 }
 @Composable
-fun ObserveUserList(onClick: () -> kotlin.Unit,navController: NavHostController){
+fun ObserveUserList(onClick: () -> Unit,navController: NavHostController,title: String){
     val homeVM = hiltViewModel<HomeViewModel>()
     val userList = mutableListOf<User>()
     val listUserState = homeVM.listUserStatus.observeAsState()
@@ -919,34 +937,43 @@ fun ObserveUserList(onClick: () -> kotlin.Unit,navController: NavHostController)
             }
         }
     }
-    Row(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp),
-        Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        Column(verticalArrangement = Arrangement.Center) {
-            userList.forEach {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(1f)
-                        .padding(8.dp),
-                    shape= RoundedCornerShape(8.dp),
-                    backgroundColor = MaterialTheme.colors.secondary
-                ){
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        Arrangement.SpaceBetween
-                    ){
-                        HeaderCardItem(text1 = it.ign.toString(), text2 = it.username, text3 = it.clubName.toString(), navController = navController)
+    AlertDialog(
+        modifier=Modifier.fillMaxHeight(0.65f),
+        backgroundColor=MaterialTheme.colors.secondary,
+        onDismissRequest=onClick,
+        title={ Row(
+            Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),horizontalArrangement = Arrangement.Center)
+        {Text(text = title,style = MaterialTheme.typography.h2,color=MaterialTheme.colors.onBackground) }},
+        text = {
+                Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement = Arrangement.Center) {
+                    userList.forEach {
+                        Card(
+                            border=BorderStroke(1.dp,MaterialTheme.colors.primaryVariant),
+                            shape= RoundedCornerShape(8.dp),
+                            backgroundColor = MaterialTheme.colors.secondary
+                        ){
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                Arrangement.SpaceBetween
+                            ){
+                                HeaderCardItem(text1 = it.ign.toString(), text2 = it.username, text3 = it.clubName.toString(), navController = navController)
+                            }
+                        }
+                        Spacer(Modifier.padding(2.dp))
                     }
                 }
-            }
-            Text("CLOSE",style=MaterialTheme.typography.subtitle2,color=Color.Red)
-        }
-    }
+        },
+        confirmButton = {
+            Text("Close",
+                Modifier
+                    .padding(8.dp)
+                    .clickable(onClick = onClick),
+                style=MaterialTheme.typography.subtitle2,color=Color.Red)}
+    )
 }
 
 @Composable
@@ -1010,8 +1037,8 @@ fun TermTextItem(title:String,desc:String){
         Modifier
             .fillMaxWidth()
             .padding(6.dp)) {
-        Text(title)
-        Text(desc,textAlign= TextAlign.Justify)
+        Text(title,style=MaterialTheme.typography.button,color = MaterialTheme.colors.onBackground)
+        Text(desc,style=MaterialTheme.typography.body1,textAlign= TextAlign.Justify,color=MaterialTheme.colors.onBackground)
         Spacer(modifier = Modifier.padding(6.dp))
     }
 }
@@ -1041,18 +1068,3 @@ fun AdvertView(modifier: Modifier = Modifier) {
         )
     }
 }
-//Row(
-//Modifier
-//.fillMaxWidth()
-//.padding(start = 12.dp, top = 6.dp, end = 12.dp, bottom = 6.dp)){
-//    Row(Modifier.weight(1f)) {
-//        Text(getTimePost(chat.date),Modifier.fillMaxWidth())
-//    }
-//    Row(Modifier.weight(1f)) {
-//        Text(chat.username.toString(),Modifier.fillMaxWidth())
-//    }
-//    Spacer(Modifier.padding(3.dp))
-//    Row(Modifier.weight(1f)) {
-//        Text(chat.clubName.toString(),Modifier.fillMaxWidth())
-//    }
-//}

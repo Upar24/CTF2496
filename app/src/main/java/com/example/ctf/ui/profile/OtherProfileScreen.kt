@@ -1,5 +1,6 @@
 package com.example.ctf.ui.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +13,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,7 +24,8 @@ import com.example.ctf.data.local.entities.Wall
 import com.example.ctf.ui.add.AddViewModel
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
-import com.example.ctf.util.Constants.TIMERKEYPREF
+import com.example.ctf.util.listString.NO_USERNAME
+import com.example.ctf.util.listString.TIMERKEYPREF
 import com.example.ctf.util.Status
 import com.example.ctf.util.listString.edit
 import com.example.ctf.util.listString.post
@@ -140,14 +143,14 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
                             seeMore = !seeMore
                         } else {
                             seeMore = !seeMore
-                            profileVM.getUser(username)
+                            profileVM.getUser(pengguna)
                         }
                     },style=MaterialTheme.typography.subtitle1,color=MaterialTheme.colors.onBackground
             )
         }
         if(seeMore){
             UserProfile(user = user)
-            if (user.username == username){
+            if (pengguna == username){
                 ButtonClickItem(desc = edit,onClick = {visibleEdit=!visibleEdit})
             }else{
                 Text("")
@@ -226,24 +229,29 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.Center
                                 ) {
+                                    val context = LocalContext.current
                                     IconButton(
                                         onClick = {
-                                            if (authVM.timerLeft() <= 0) {
-                                                profileVM.saveWall(
-                                                    Wall(
-                                                        username,
-                                                        user.ign,
-                                                        user.clubName,
-                                                        pengguna,
-                                                        wallDescState.text
-                                                    ),
-                                                    pengguna
-                                                )
-                                            } else {
-                                                snackbarCoroutineScope.launch {
-                                                    scaffoldState.snackbarHostState.showSnackbar(
-                                                        "wait ${authVM.timerLeft()} seconds left"
+                                            if(username == NO_USERNAME){
+                                                Toast.makeText( context,"Please Login First.", Toast.LENGTH_SHORT).show()
+                                            }else{
+                                                if (authVM.timerLeft() <= 0) {
+                                                    profileVM.saveWall(
+                                                        Wall(
+                                                            username,
+                                                            user.ign,
+                                                            user.clubName,
+                                                            pengguna,
+                                                            wallDescState.text
+                                                        ),
+                                                        pengguna
                                                     )
+                                                } else {
+                                                    snackbarCoroutineScope.launch {
+                                                        scaffoldState.snackbarHostState.showSnackbar(
+                                                            "wait ${authVM.timerLeft()} seconds left"
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }, modifier = Modifier
@@ -296,7 +304,7 @@ fun OtherProfileScreen(pengguna:String,navController: NavHostController){
                                 },navController
                             )
                         }
-                        Spacer(modifier = Modifier.padding(4.dp))
+                        Spacer(modifier = Modifier.padding(2.dp))
                     }
                 }
             }

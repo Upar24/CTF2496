@@ -37,6 +37,8 @@ class AddViewModel @Inject constructor(
     val allUserTrading:LiveData<Resource<List<Trading>>> = _allUserTrading
     private val _titleSearchStatus = MutableLiveData<Resource<List<Trading>>>()
     val titleSearchStatus:LiveData<Resource<List<Trading>>> = _titleSearchStatus
+    private val _descSearchStatus = MutableLiveData<Resource<List<Trading>>>()
+    val descSearchStatus:LiveData<Resource<List<Trading>>> = _descSearchStatus
 
 
     fun saveTrading(trading: Trading){
@@ -95,6 +97,13 @@ class AddViewModel @Inject constructor(
         viewModelScope.launch {
             val result = repository.getTitleSearch(query)
             _titleSearchStatus.postValue(result)
+        }
+    }
+    fun getDescriptionSearch(query: String){
+        _descSearchStatus.postValue(Resource.loading(null))
+        viewModelScope.launch {
+            val result = repository.getDescriptionSearch(query)
+            _descSearchStatus.postValue(result)
         }
     }
 

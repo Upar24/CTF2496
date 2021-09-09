@@ -1,20 +1,19 @@
 package com.example.ctf.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.ctf.ui.component.AdvertPreview
+import com.example.ctf.ui.component.AdvertView
 import com.example.ctf.ui.component.TermTextItem
 
 @Composable
 fun DictionaryScreen(){
     Column {
-        AdvertPreview()
+        AdvertView()
+        Spacer(modifier = Modifier.padding(4.dp))
         Column(
             Modifier
                 .fillMaxWidth()
@@ -89,5 +88,6 @@ fun DictionaryScreen(){
             TermTextItem(title = "WC", desc = "World Chat. Where players can use speakers in order to message the public.")
             TermTextItem(title = "WW", desc = "Wedding War. Fun wars against two people and their selected sides that they organise.")
         }
+
     }
 }

@@ -29,8 +29,8 @@ val Typography = Typography(defaultFontFamily = Sans,
     ),
     h3 =TextStyle(
         fontFamily = Sans,
-        fontWeight = FontWeight.W300,
-        fontSize = 30.sp
+        fontWeight = FontWeight.W400,
+        fontSize = 16.sp,
     ),
     h4 =TextStyle(
         fontFamily = Sans,

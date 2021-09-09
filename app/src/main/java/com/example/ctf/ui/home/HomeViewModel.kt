@@ -59,17 +59,18 @@ class HomeViewModel @Inject constructor(
             _getChatStatus.postValue(result)
         }
     }
-    fun saveParty(party: Party){
+    fun saveParty(query: String,party: Party){
         _savePartyStatus.postValue(Event(Resource.loading(null)))
         viewModelScope.launch {
             val result = repository.saveParty(party)
             _savePartyStatus.postValue(Event(result))
+            getPartyList(query)
         }
     }
-    fun getPartyList(){
+    fun getPartyList(query:String){
         _partyListStatus.postValue(Resource.loading(null))
         viewModelScope.launch {
-            val result = repository.getPartyList()
+            val result = repository.getPartyList(query)
             _partyListStatus.postValue(result)
         }
     }
@@ -108,19 +109,19 @@ class HomeViewModel @Inject constructor(
             _deleteDropStatus.postValue(Event(result))
         }
     }
-    fun toggleCheck(party: Party)=viewModelScope.launch {
+    fun toggleCheck(query: String,party: Party)=viewModelScope.launch {
         repository.toggleCheck(party)
-        getPartyList()
+        getPartyList(query)
     }
 
-    fun toggleDrop(party: Party)= viewModelScope.launch {
+    fun toggleDrop(query: String,party: Party)= viewModelScope.launch {
         repository.toggleDrop(party)
-        getPartyList()
+        getPartyList(query)
     }
 
-    fun toggleNope(party: Party)=viewModelScope.launch {
+    fun toggleNope(query:String,party: Party)=viewModelScope.launch {
         repository.toggleNope(party)
-        getPartyList()
+        getPartyList(query)
     }
 
 }

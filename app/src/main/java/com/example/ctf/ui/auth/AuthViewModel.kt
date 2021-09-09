@@ -7,16 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ctf.data.remote.BasicAuthInterceptor
 import com.example.ctf.repository.CTFRepository
-import com.example.ctf.util.Constants.KEY_LOGGED_IN_PASSWORD
-import com.example.ctf.util.Constants.KEY_LOGGED_IN_USERNAME
-import com.example.ctf.util.Constants.LOGIN
-import com.example.ctf.util.Constants.LOGOUT
-import com.example.ctf.util.Constants.NOTIMER
-import com.example.ctf.util.Constants.NO_PASSWORD
-import com.example.ctf.util.Constants.NO_USERNAME
-import com.example.ctf.util.Constants.TIMERKEYPREF
-import com.example.ctf.util.Event
 import com.example.ctf.util.Resource
+import com.example.ctf.util.listString.KEY_LOGGED_IN_PASSWORD
+import com.example.ctf.util.listString.KEY_LOGGED_IN_USERNAME
+import com.example.ctf.util.listString.LOGIN
+import com.example.ctf.util.listString.LOGOUT
+import com.example.ctf.util.listString.NOTIMER
+import com.example.ctf.util.listString.NO_PASSWORD
+import com.example.ctf.util.listString.NO_USERNAME
+import com.example.ctf.util.listString.TIMERKEYPREF
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,46 +36,27 @@ class AuthViewModel @Inject constructor (
     var passwordvm: String? = null
 
 
-    private val _registerStatus = MutableLiveData<Event<Resource<String>>>()
-    val registerStatus: LiveData<Event<Resource<String>>> = _registerStatus
-    private val _loginStatus = MutableLiveData<Event<Resource<String>>>()
-    val loginStatus: LiveData<Event<Resource<String>>> = _loginStatus
+
+    private val _registerStatus = MutableLiveData<Resource<String>>()
+    val registerStatus: LiveData<Resource<String>> = _registerStatus
+    private val _loginStatus = MutableLiveData<Resource<String>>()
+    val loginStatus: LiveData<Resource<String>> = _loginStatus
 
     fun loginUser(username:String,password:String){
-        _loginStatus.postValue(Event(Resource.loading(null)))
-        if(username.isEmpty() || password.isEmpty()){
-            _loginStatus.postValue(Event(Resource.error("Please fill out all the fields",null)))
-            return
-        }
+        _loginStatus.postValue(Resource.loading(null))
         viewModelScope.launch{
             usernamevm=username
             passwordvm=password
             val result= repository.login(username,password)
-            _loginStatus.postValue(Event(result))
+            _loginStatus.postValue(result)
         }
     }
 
-    fun registerUser(username:String,password:String,repeatedPassword:String){
-        _registerStatus.postValue(Event(Resource.loading(null)))
-        if(username.isEmpty() || password.isEmpty() || repeatedPassword.isEmpty()){
-            _registerStatus.postValue(Event(Resource.error("Please fill out all the fields",null)))
-            return
-        }
-        if(password != repeatedPassword){
-            _registerStatus.postValue(Event(Resource.error("The passwords do not match", null)))
-            return
-        }
-        if(username.length < 3 || password.length < 3){
-            _registerStatus.postValue(Event(Resource.error("must be at least 3 characters.",null)))
-            return
-        }
-        if(username.length > 24 || password.length > 24){
-            _registerStatus.postValue(Event(Resource.error("characters are too long.",null)))
-            return
-        }
+    fun registerUser(username:String,password:String){
+        _registerStatus.postValue(Resource.loading(null))
         viewModelScope.launch {
             val result = repository.register(username, password)
-            _registerStatus.postValue(Event(result))
+            _registerStatus.postValue(result)
         }
     }
     fun timerLeft():Int{

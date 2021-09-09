@@ -23,6 +23,7 @@ import com.example.ctf.ui.component.*
 import com.example.ctf.util.Status
 import com.example.ctf.util.listString.all
 import com.example.ctf.util.listString.buying
+import com.example.ctf.util.listString.desc
 import com.example.ctf.util.listString.search
 import com.example.ctf.util.listString.selling
 import com.example.ctf.util.listString.title
@@ -43,6 +44,7 @@ fun AddScreen(navController: NavHostController){
         val queryState = remember { TextFieldState() }
         val allTradingList = mutableListOf<Trading>()
         val titleTradingList = mutableListOf<Trading>()
+        val descTradingList = mutableListOf<Trading>()
         val buyingTradingList = mutableListOf<Trading>()
         val sellingTradingList = mutableListOf<Trading>()
         var trading by remember{mutableStateOf(Trading("","",""))}
@@ -91,7 +93,7 @@ fun AddScreen(navController: NavHostController){
                         listTrading.forEach { trading ->
                             allTradingList.add(trading)
                         }
-                    }
+                    }  ?: allTradingList.clear()
                 }
                 Status.ERROR -> {  }
                 Status.LOADING -> {
@@ -107,6 +109,23 @@ fun AddScreen(navController: NavHostController){
                         titleTradingList.clear()
                         listTrading.forEach {trading ->
                             titleTradingList.add(trading)
+                        }
+                    }
+                }
+                Status.ERROR -> { }
+                Status.LOADING -> {
+                    ProgressCardToastItem()
+                }
+            }
+        }
+        val descSearchState= addVM.descSearchStatus.observeAsState()
+        descSearchState.value?.let {
+            when(it.status){
+                Status.SUCCESS -> {
+                    it.data?.let {listTrading->
+                        descTradingList.clear()
+                        listTrading.forEach {trading ->
+                            descTradingList.add(trading)
                         }
                     }
                 }
@@ -151,7 +170,7 @@ fun AddScreen(navController: NavHostController){
             }
         }
         AdvertView()
-        Spacer(Modifier.padding(24.dp))
+        Spacer(Modifier.padding(16.dp))
         TextFieldOutlined(desc = search,queryState)
         Spacer(modifier = Modifier.padding(8.dp))
         Row (Modifier.fillMaxWidth(),
@@ -168,11 +187,11 @@ fun AddScreen(navController: NavHostController){
                 colors=if(visibleScreen==buying)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
-                desc = all, onClick = {
-                    visibleScreen = all
-                    addVM.getAllTrading()
-                },bordercolor= if(visibleScreen== all)MaterialTheme.colors.primary else MaterialTheme.colors.background,
-                colors=if(visibleScreen==all)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+                desc =selling, onClick = {
+                    visibleScreen = selling
+                    addVM.getSellingSearch(queryState.text)
+                },bordercolor= if(visibleScreen== selling)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==selling)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
                 desc = title, onClick = {
@@ -182,11 +201,18 @@ fun AddScreen(navController: NavHostController){
                 colors=if(visibleScreen==title)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
             ButtonClickItem(
-                desc =selling, onClick = {
-                    visibleScreen = selling
-                    addVM.getSellingSearch(queryState.text)
-                },bordercolor= if(visibleScreen== selling)MaterialTheme.colors.primary else MaterialTheme.colors.background,
-                colors=if(visibleScreen==selling)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+                desc = desc, onClick = {
+                    visibleScreen = desc
+                    addVM.getDescriptionSearch(queryState.text)
+                },bordercolor= if(visibleScreen== desc)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==desc)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
+            )
+            ButtonClickItem(
+                desc = all, onClick = {
+                    visibleScreen = all
+                    addVM.getAllTrading()
+                },bordercolor= if(visibleScreen== all)MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                colors=if(visibleScreen==all)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
         }
         DividerItem()
@@ -194,6 +220,7 @@ fun AddScreen(navController: NavHostController){
             buying -> buyingTradingList
             selling -> sellingTradingList
             title -> titleTradingList
+            desc -> descTradingList
             else -> allTradingList
         }
         Column (
@@ -220,7 +247,7 @@ fun AddScreen(navController: NavHostController){
                         },navController
                     )
                 }
-                Spacer(modifier = Modifier.padding(4.dp))
+                Spacer(modifier = Modifier.padding(2.dp))
             }
         }
 

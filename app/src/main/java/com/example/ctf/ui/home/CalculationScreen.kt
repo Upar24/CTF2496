@@ -15,8 +15,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ctf.R
+import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
+import com.example.ctf.util.Constants
 import com.example.ctf.util.listString.dvp
 import com.example.ctf.util.listString.init
 import com.example.ctf.util.listString.interest
@@ -34,6 +37,7 @@ import java.util.*
 fun CalculationScreen() {
     val listCalc = listOf(dvp, upgrade, ts, maxplunder)
     var visibleCalc by remember { mutableStateOf(dvp) }
+
     Column(Modifier.fillMaxWidth()){
         var tabIndex by remember { mutableStateOf(0) }
 

@@ -223,6 +223,18 @@ class CTFRepository @Inject constructor(
             Resource.error("Couldnt connect to the server",null)
         }
     }
+    suspend fun getDescriptionSearch(query: String)= withContext(Dispatchers.IO){
+        try {
+            val response=ctfApi.getDescriptionSearch(OneRequest(query))
+            if(response.isSuccessful){
+                Resource.success(response.body())
+            }else{
+                Resource.error(response.message(),null)
+            }
+        }catch (e:Exception){
+            Resource.error("Couldnt connect to the server",null)
+        }
+    }
     suspend fun saveParty(party: Party)= withContext(Dispatchers.IO){
         try {
             val response=ctfApi.saveParty( party)
@@ -235,9 +247,9 @@ class CTFRepository @Inject constructor(
             Resource.error("Couldnt connect to the server",null)
         }
     }
-    suspend fun getPartyList()= withContext(Dispatchers.IO){
+    suspend fun getPartyList(query: String)= withContext(Dispatchers.IO){
         try {
-            val response= ctfApi.getPartyList()
+            val response= ctfApi.getPartyList(OneRequest(query))
             if(response.isSuccessful){
                 Resource.success(response.body())
             }else{

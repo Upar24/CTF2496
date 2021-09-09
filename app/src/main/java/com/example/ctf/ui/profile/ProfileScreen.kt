@@ -24,7 +24,8 @@ import com.example.ctf.data.local.entities.Wall
 import com.example.ctf.ui.add.AddViewModel
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
-import com.example.ctf.util.Constants.TIMERKEYPREF
+import com.example.ctf.util.listString.NO_USERNAME
+import com.example.ctf.util.listString.TIMERKEYPREF
 import com.example.ctf.util.Status
 import com.example.ctf.util.listString.edit
 import com.example.ctf.util.listString.post
@@ -235,23 +236,28 @@ fun ProfileScreen(navController: NavHostController) {
                                 }
                                 Spacer(Modifier.padding(2.dp))
                                 Row(Modifier.weight(1f),verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.Start){
+                                    val context= LocalContext.current
                                     IconButton(onClick ={
-                                        if (authVM.timerLeft() <= 0) {
-                                            profileVM.saveWall(
-                                                Wall(
-                                                    username,
-                                                    user.ign,
-                                                    user.clubName,
-                                                    username,
-                                                    wallDescState.text,
-                                                ),
-                                                username
-                                            )
-                                        } else {
-                                            snackbarCoroutineScope.launch {
-                                                scaffoldState.snackbarHostState.showSnackbar(
-                                                    "wait ${authVM.timerLeft()} seconds left"
+                                        if(username == NO_USERNAME){
+                                            Toast.makeText( context,"Please Login First.", Toast.LENGTH_SHORT).show()
+                                        }else{
+                                            if (authVM.timerLeft() <= 0) {
+                                                profileVM.saveWall(
+                                                    Wall(
+                                                        username,
+                                                        user.ign,
+                                                        user.clubName,
+                                                        username,
+                                                        wallDescState.text,
+                                                    ),
+                                                    username
                                                 )
+                                            } else {
+                                                snackbarCoroutineScope.launch {
+                                                    scaffoldState.snackbarHostState.showSnackbar(
+                                                        "wait ${authVM.timerLeft()} seconds left"
+                                                    )
+                                                }
                                             }
                                         }
                                     },modifier = Modifier
@@ -300,7 +306,7 @@ fun ProfileScreen(navController: NavHostController) {
                                 },navController
                             )
                         }
-                        Spacer(modifier = Modifier.padding(4.dp))
+                        Spacer(modifier = Modifier.padding(2.dp))
                     }
                 }
             }

@@ -44,7 +44,7 @@ fun SearchScreen(navController: NavHostController){
         var visibleScreen by remember { mutableStateOf("") }
 
         val searchState = remember { TextFieldState("") }
-        Spacer(Modifier.padding(24.dp))
+        Spacer(Modifier.padding(16.dp))
         TextFieldOutlined(desc = search,searchState)
         Spacer(Modifier.padding(8.dp))
         Text("Search for",style=MaterialTheme.typography.body1)
@@ -127,39 +127,39 @@ fun SearchScreen(navController: NavHostController){
         ){
             listDisplay.forEach {
                 Card(
-                    Modifier.padding(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
-                    shape = RoundedCornerShape(8.dp),
+                    border=BorderStroke(1.dp,MaterialTheme.colors.primaryVariant),
+                    shape= RoundedCornerShape(8.dp),
                     backgroundColor = MaterialTheme.colors.secondary
                 ){
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(6.dp),
+                            .padding(8.dp),
                     Arrangement.SpaceBetween
                 ){
-                    HeaderCardItem(text1 = it.username, text2 = it.ign.toString(), text3 =it.clubName.toString(),navController )
+                    HeaderCardItem(text1 = it.ign.toString(), text2 = it.username, text3 =it.clubName.toString(),navController )
                 }
                 }
+                Spacer(modifier = Modifier.padding(2.dp))
             }
         }
         if(visibleScreen==username){
             if(userSearch.username != ""){
                 Card(
-                    Modifier.padding(8.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
-                    shape = RoundedCornerShape(8.dp),
+                    border=BorderStroke(1.dp,MaterialTheme.colors.primaryVariant),
+                    shape= RoundedCornerShape(8.dp),
                     backgroundColor = MaterialTheme.colors.secondary
                 ){
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
+                            .padding(8.dp),
                         Arrangement.SpaceBetween
                     ){
-                        HeaderCardItem(text1 = userSearch.username, text2 = userSearch.ign.toString(), text3 = userSearch.clubName.toString(),navController)
+                        HeaderCardItem(text1 = userSearch.ign.toString(), text2 = userSearch.username, text3 = userSearch.clubName.toString(),navController)
                     }
                 }
+                Spacer(modifier = Modifier.padding(2.dp))
             }
         }
     }

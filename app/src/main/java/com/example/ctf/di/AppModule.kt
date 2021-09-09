@@ -8,8 +8,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.ctf.data.remote.BasicAuthInterceptor
 import com.example.ctf.data.remote.CTFApi
-import com.example.ctf.util.Constants.BASE_URL
-import com.example.ctf.util.Constants.ENCRYPTED_SHARED_PREF_NAME
+import com.example.ctf.util.listString.BASE_URL
+import com.example.ctf.util.listString.ENCRYPTED_SHARED_PREF_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

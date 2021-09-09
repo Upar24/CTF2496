@@ -6,15 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
-import com.example.ctf.data.local.entities.Trading
-import com.example.ctf.repository.CTFRepository
 import com.example.ctf.ui.auth.AuthViewModel
-import com.example.ctf.util.Constants.BUYING_RATE
-import com.example.ctf.util.Constants.INTEREST_RATE
-import com.example.ctf.util.Constants.KEY_LOGGED_IN_USERNAME
-import com.example.ctf.util.Constants.NO_USERNAME
+import com.example.ctf.util.listString.BUYING_RATE
+import com.example.ctf.util.listString.INTEREST_RATE
+import com.example.ctf.util.listString.KEY_LOGGED_IN_USERNAME
+import com.example.ctf.util.listString.MAXPLUMBERVALUE
+import com.example.ctf.util.listString.NO_USERNAME
 import com.example.ctf.util.listString.T10L1
 import com.example.ctf.util.listString.T10L2
 import com.example.ctf.util.listString.T10L3
@@ -59,11 +56,10 @@ import com.example.ctf.util.listString.T9L1
 import com.example.ctf.util.listString.T9L2
 import com.example.ctf.util.listString.T9L3
 import com.example.ctf.util.listString.T9L4
+import com.example.ctf.util.listString.TSVALUE
 import com.example.ctf.util.listString.nope
 import com.example.ctf.util.listString.ts
 import java.text.NumberFormat
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.roundToLong
 
 class TextFieldState(string: String=""){
@@ -72,7 +68,7 @@ class TextFieldState(string: String=""){
 fun getTimePost(timePost:Long):String{
     val endTime= System.currentTimeMillis()
     val diff= (endTime - timePost) / 1000
-    var date= ""
+    val date: String
     if(diff >= 86400){date=if((diff<172799)) "1 day" else "${NumberFormat.getNumberInstance().format(diff/86400)} days"}
     else if(diff >= 3600){date=if((diff<7199))"1 hour" else "${NumberFormat.getNumberInstance().format(diff/3600)} hours"}
     else if(diff >= 60) {date=if((diff<119))"1 minute" else "${NumberFormat.getNumberInstance().format(diff/60)} minutes"}
@@ -181,5 +177,5 @@ fun valueOfTheTier(tier:String):Long {
     return value
 }
 fun tsmaxplunder(tsValue:Long,request: String):String{
-    return if(request== ts) NumberFormat.getNumberInstance().format(tsValue * 6) else NumberFormat.getNumberInstance().format(tsValue * 0.5)
+    return if(request== ts) NumberFormat.getNumberInstance().format(Math.round((tsValue * TSVALUE)*10.0)/10.0) else NumberFormat.getNumberInstance().format(tsValue * MAXPLUMBERVALUE)
 }

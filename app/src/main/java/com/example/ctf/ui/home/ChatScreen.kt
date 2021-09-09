@@ -1,9 +1,9 @@
 package com.example.ctf.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -15,16 +15,17 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.ctf.data.local.entities.Chat
 import com.example.ctf.ui.auth.AuthViewModel
 import com.example.ctf.ui.component.*
-import com.example.ctf.util.Constants
+import com.example.ctf.util.listString.NO_USERNAME
 import com.example.ctf.util.Status
+import com.example.ctf.util.listString.TIMERKEYPREF
 import com.example.ctf.util.listString.hotsale
 import com.example.ctf.util.listString.lbhneeded
 import com.example.ctf.util.listString.lbhpost
@@ -57,7 +58,7 @@ fun ChatScreen(navController:NavHostController) {
             when (result.status) {
                 Status.SUCCESS -> {
                     authVM.sharedPref.edit().putString(
-                        Constants.TIMERKEYPREF,
+                        TIMERKEYPREF,
                         (System.currentTimeMillis() + 25000L).toString()
                     ).apply()
                 }
@@ -129,11 +130,13 @@ fun ChatScreen(navController:NavHostController) {
                     else -> randomList
                 }
                 Spacer(
-                    modifier = Modifier.constrainAs(spacerText) {
-                        start.linkTo(parent.start)
-                        top.linkTo(parent.top)
-                        end.linkTo(parent.end)
-                    }.padding(2.dp)
+                    modifier = Modifier
+                        .constrainAs(spacerText) {
+                            start.linkTo(parent.start)
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                        }
+                        .padding(2.dp)
                 )
                 Column(
                     Modifier
@@ -150,11 +153,13 @@ fun ChatScreen(navController:NavHostController) {
                     }
                 }
                 Card(
-                    Modifier.fillMaxWidth().constrainAs(chatMsg) {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                    },
+                    Modifier
+                        .fillMaxWidth()
+                        .constrainAs(chatMsg) {
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                        },
                     backgroundColor = MaterialTheme.colors.background
                 ) {
                     Row(
@@ -174,24 +179,31 @@ fun ChatScreen(navController:NavHostController) {
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val login : Boolean = getUsernameLoginFunction()==NO_USERNAME
+                            val context = LocalContext.current
                             IconButton(
                                 onClick = {
-                                    if (authVM.timerLeft() <= 0) {
-                                        authVM.isLoggedIn()
-                                        authVM.authenticateApi(
-                                            authVM.usernamevm ?: "",
-                                            authVM.passwordvm ?: ""
-                                        )
-                                        homeVM.saveChat(
-                                            Chat(
-                                                username = username,
-                                                chat = typeState.text,
-                                                type = visibleChat
+                                    if(login){
+                                        Toast.makeText( context,"Please Login First.", Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }else{
+                                        if (authVM.timerLeft() <= 0) {
+                                            authVM.isLoggedIn()
+                                            authVM.authenticateApi(
+                                                authVM.usernamevm ?: "",
+                                                authVM.passwordvm ?: ""
                                             )
-                                        )
-                                    } else {
-                                        snackbarCoroutineScope.launch {
-                                            scaffoldState.snackbarHostState.showSnackbar("wait ${authVM.timerLeft()} seconds left")
+                                            homeVM.saveChat(
+                                                Chat(
+                                                    username = username,
+                                                    chat = typeState.text,
+                                                    type = visibleChat
+                                                )
+                                            )
+                                        } else {
+                                            snackbarCoroutineScope.launch {
+                                                scaffoldState.snackbarHostState.showSnackbar("wait ${authVM.timerLeft()} seconds left")
+                                            }
                                         }
                                     }
                                 }, modifier = Modifier

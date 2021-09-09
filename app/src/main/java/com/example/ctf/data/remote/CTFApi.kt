@@ -6,6 +6,35 @@ import com.example.ctf.data.remote.requests.ListStringRequest
 import com.example.ctf.data.remote.requests.OneRequest
 import com.example.ctf.data.remote.requests.UpdateUserRequest
 import com.example.ctf.data.remote.responses.SimpleResponse
+import com.example.ctf.util.listString.deleteDropPath
+import com.example.ctf.util.listString.deleteTradingPath
+import com.example.ctf.util.listString.deleteWallPath
+import com.example.ctf.util.listString.getAllTradingPath
+import com.example.ctf.util.listString.getAllUserTradingPath
+import com.example.ctf.util.listString.getBuyingSearchPath
+import com.example.ctf.util.listString.getChatPath
+import com.example.ctf.util.listString.getDescriptionSearchPath
+import com.example.ctf.util.listString.getListUserClubPath
+import com.example.ctf.util.listString.getListUserIgnPath
+import com.example.ctf.util.listString.getListUserPath
+import com.example.ctf.util.listString.getPartyPath
+import com.example.ctf.util.listString.getSellingSearchPath
+import com.example.ctf.util.listString.getTitleSearchPath
+import com.example.ctf.util.listString.getTradingPath
+import com.example.ctf.util.listString.getUserPath
+import com.example.ctf.util.listString.getWallPath
+import com.example.ctf.util.listString.loginPath
+import com.example.ctf.util.listString.registerPath
+import com.example.ctf.util.listString.saveChatPath
+import com.example.ctf.util.listString.saveDropPath
+import com.example.ctf.util.listString.savePartyPath
+import com.example.ctf.util.listString.saveTodayPath
+import com.example.ctf.util.listString.saveTradingPath
+import com.example.ctf.util.listString.saveWallPath
+import com.example.ctf.util.listString.toggleCheckPath
+import com.example.ctf.util.listString.toggleDropPath
+import com.example.ctf.util.listString.toggleNopePath
+import com.example.ctf.util.listString.updateUserPath
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -14,141 +43,148 @@ import retrofit2.http.POST
 
 interface CTFApi {
 
-    @POST("/register")
+    @POST(registerPath)
     suspend fun register(
         @Body registerRequest: AccountRequest
     ): Response<SimpleResponse>
 
-    @POST("/login")
+    @POST(loginPath)
     suspend fun login(
         @Body loginRequest: AccountRequest
     ):Response<SimpleResponse>
 
-    @POST("/getuser")
+    @POST(getUserPath)
     suspend fun getUser(
         @Body oneRequest: OneRequest
     ):Response<User>
 
-    @POST("updateuser")
+    @POST(updateUserPath)
     suspend fun updateProfile(
         @Body updateUserReq: UpdateUserRequest
     ):Response<SimpleResponse>
 
-    @POST("/savewall")
+    @POST(saveWallPath)
     suspend fun saveWall(
         @Body wall: Wall
     ):Response<SimpleResponse>
 
-    @POST("/getwall")
+    @POST(getWallPath)
     suspend fun getWall(
         @Body getRequest : OneRequest
     ):Response<List<Wall>>
 
-    @POST("/deletewall")
+    @POST(deleteWallPath)
     suspend fun deleteWall(
         @Body wall:Wall
     ):Response<SimpleResponse>
 
-    @POST("/savechat")
+    @POST(saveChatPath)
     suspend fun saveChat(
         @Body chat: Chat
     ):Response<SimpleResponse>
 
-    @GET("/getchat")
+    @GET(getChatPath)
     suspend fun getChat():Response<List<Chat>>
 
-    @POST("/savetrading")
+    @POST(saveTradingPath)
     suspend fun saveTrading(
         @Body trading: Trading
     ):Response<SimpleResponse>
 
-    @POST("/deletetrading")
+    @POST(deleteTradingPath)
     suspend fun deleteTrading(
         @Body trading:Trading
     ):Response<SimpleResponse>
 
-    @GET("/getalltrading")
+    @GET(getAllTradingPath)
     suspend fun getAllTrading():Response<List<Trading>>
 
-    @POST("/getallusertrading")
+    @POST(getAllUserTradingPath)
     suspend fun getAllUserTrading(
         @Body username:OneRequest
     ):Response<List<Trading>>
 
-    @POST("/gettrading")
+    @POST(getTradingPath)
     suspend fun getTrading(
         @Body trading: Trading
     ):Response<Trading>
 
-    @POST("/getbuyingsearch")
+    @POST(getBuyingSearchPath)
     suspend fun getBuyingSearch(
         @Body query:OneRequest
     ):Response<List<Trading>>
 
-    @POST("/getsellingsearch")
+    @POST(getSellingSearchPath)
     suspend fun getSellingSearch(
         @Body query:OneRequest
     ):Response<List<Trading>>
 
-    @POST("/gettitlesearch")
+    @POST(getTitleSearchPath)
     suspend fun getTitleSearch(
         @Body query:OneRequest
     ):Response<List<Trading>>
 
-    @POST("/saveparty")
+    @POST(getDescriptionSearchPath)
+    suspend fun getDescriptionSearch(
+        @Body query:OneRequest
+    ):Response<List<Trading>>
+
+    @POST(savePartyPath)
     suspend fun saveParty(
         @Body party: Party
     ):Response<SimpleResponse>
-    @GET("/saveparty")
-    suspend fun getPartyList():Response<List<Party>>
+    @POST(getPartyPath)
+    suspend fun getPartyList(
+        @Body query: OneRequest
+    ):Response<List<Party>>
 
-    @POST("/savedrop")
+    @POST(saveDropPath)
     suspend fun saveDrop(
         @Body dropped: Dropped
     ):Response<SimpleResponse>
-    @GET("/savedrop")
+    @GET(saveDropPath)
     suspend fun getDrop():Response<List<Dropped>>
 
-    @POST("/savetoday")
+    @POST(saveTodayPath)
     suspend fun saveToday(
         @Body today: Today
     ):Response<SimpleResponse>
-    @GET("/savetoday")
+    @GET(saveTodayPath)
     suspend fun getToday():Response<Today>
 
-    @POST("/deletedrop")
+    @POST(deleteDropPath)
     suspend fun deleteDrop(
         @Body dropped: Dropped
     ):Response<SimpleResponse>
-    @GET("/deletedrop")
+    @GET(deleteDropPath)
     suspend fun deletion():Response<SimpleResponse>
 
-    @POST("/togglecheck")
+    @POST(toggleCheckPath)
     suspend fun toggleCheck(
         @Body party: Party
     ):Response<ResponseBody>
 
-    @POST("/toggledrop")
+    @POST(toggleDropPath)
     suspend fun toggleDrop(
         @Body party: Party
     ):Response<ResponseBody>
 
-    @POST("/togglenope")
+    @POST(toggleNopePath)
     suspend fun toggleNope(
         @Body party: Party
     ):Response<ResponseBody>
 
-    @POST("/getlistuser")
+    @POST(getListUserPath)
     suspend fun getListUser(
         @Body listUsername: ListStringRequest
     ):Response<List<User>>
 
-    @POST("/getlistuserclub")
+    @POST(getListUserClubPath)
     suspend fun ListUserClub(
         @Body clubName:OneRequest
     ):Response<List<User>>
 
-    @POST("/getlistuserign")
+    @POST(getListUserIgnPath)
     suspend fun ListUserIgn(
         @Body ignName:OneRequest
     ):Response<List<User>>

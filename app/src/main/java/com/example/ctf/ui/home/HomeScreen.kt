@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.ctf.ui.component.AdvertView
+import com.example.ctf.util.listString.arts
 import com.example.ctf.util.listString.calculation
 import com.example.ctf.util.listString.chatchar
 import com.example.ctf.util.listString.partychar
@@ -52,7 +52,7 @@ fun HomeScreen(navController: NavHostController
         if(visibleHome== partychar){
             homeVM.getToday()
             homeVM.getDropList()
-            homeVM.getPartyList()
+            homeVM.getPartyList(arts)
             PartyScreen(navController)
         }else if(visibleHome== chatchar){
             homeVM.getChat()
