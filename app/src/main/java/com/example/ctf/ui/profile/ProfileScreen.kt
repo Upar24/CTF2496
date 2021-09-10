@@ -204,7 +204,7 @@ fun ProfileScreen(navController: NavHostController) {
                                 top.linkTo(parent.top)
                                 end.linkTo(parent.end)
                             }
-                            .padding(2.dp)
+                            .padding(0.dp)
                     )
                     Column(Modifier.constrainAs(wallConstraint){
                         start.linkTo(parent.start)
@@ -248,7 +248,7 @@ fun ProfileScreen(navController: NavHostController) {
                                                         user.ign,
                                                         user.clubName,
                                                         username,
-                                                        wallDescState.text,
+                                                        if(wallDescState.text.length > 101)wallDescState.text.substring(0,100) else wallDescState.text,
                                                     ),
                                                     username
                                                 )
@@ -284,7 +284,6 @@ fun ProfileScreen(navController: NavHostController) {
                 Column(
                     Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    Spacer(Modifier.padding(4.dp))
                     postList.forEach { trading1 ->
                         Card(
                             Modifier.fillMaxWidth(),
@@ -303,6 +302,7 @@ fun ProfileScreen(navController: NavHostController) {
                                     authVM.isLoggedIn()
                                     authVM.authenticateApi(authVM.usernamevm ?: "", authVM.passwordvm ?: "")
                                     addVM.deleteTrading(trading1)
+                                    addVM.getAllUserTrading(username)
                                 },navController
                             )
                         }

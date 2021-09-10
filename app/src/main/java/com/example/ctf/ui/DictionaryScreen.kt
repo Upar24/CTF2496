@@ -3,10 +3,12 @@ package com.example.ctf.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.ctf.ui.component.AdvertView
+import com.example.ctf.ui.component.DividerItem
 import com.example.ctf.ui.component.TermTextItem
 
 @Composable
@@ -14,10 +16,14 @@ fun DictionaryScreen(){
     Column {
         AdvertView()
         Spacer(modifier = Modifier.padding(4.dp))
+        Row(
+            Modifier.fillMaxWidth().padding(end=16.dp),horizontalArrangement = Arrangement.End
+        ){Text("Credit : Bird")}
+        DividerItem()
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 60.dp)
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 70.dp)
                 .verticalScroll(rememberScrollState())
         ){
             TermTextItem(title = "Alt", desc = "Alternative account. Someone may have a main account, and many 'alts', smaller accounts they use less.")

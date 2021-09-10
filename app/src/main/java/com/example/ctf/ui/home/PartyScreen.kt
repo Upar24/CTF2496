@@ -168,7 +168,7 @@ fun PartyScreen(navController: NavHostController) {
                 "Today Reguler: ${today.reguler}",
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier
-                    .padding(bottom = 8.dp,top=8.dp)
+                    .padding(bottom = 8.dp, top = 8.dp)
                     .constrainAs(regulerText) {
                         start.linkTo(parent.start)
                         bottom.linkTo(listReguler.top)
@@ -179,7 +179,7 @@ fun PartyScreen(navController: NavHostController) {
                 "Today Ultra: ${today.ultra}",
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier
-                    .padding(bottom = 8.dp,top=8.dp)
+                    .padding(bottom = 8.dp, top = 8.dp)
                     .constrainAs(ultraText) {
                         start.linkTo(spacerText.end)
                         bottom.linkTo(listUltra.top)
@@ -241,7 +241,6 @@ fun PartyScreen(navController: NavHostController) {
             Modifier
                 .verticalScroll(rememberScrollState())
         ) {
-
             allList.forEach { party->
                 Card(
                     Modifier.fillMaxWidth(),

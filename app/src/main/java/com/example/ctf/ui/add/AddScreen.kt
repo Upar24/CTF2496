@@ -215,7 +215,6 @@ fun AddScreen(navController: NavHostController){
                 colors=if(visibleScreen==all)ButtonDefaults.buttonColors(MaterialTheme.colors.background) else ButtonDefaults.buttonColors(MaterialTheme.colors.primary)
             )
         }
-        DividerItem()
         val listDisplay:MutableList<Trading> = when (visibleScreen){
             buying -> buyingTradingList
             selling -> sellingTradingList

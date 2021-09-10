@@ -154,7 +154,7 @@ fun TextFieldOutlined(desc:String,state: TextFieldState = remember {TextFieldSta
         },
         textStyle = MaterialTheme.typography.body2,
         shape=RoundedCornerShape(8.dp),
-        maxLines=7,
+        singleLine = true,
         colors = TextFieldDefaults.outlinedTextFieldColors(textColor = MaterialTheme.colors.onBackground)
     )
 }
@@ -174,8 +174,7 @@ fun EditTextStringItem(state: TextFieldState = remember {TextFieldState()},text:
             disabledIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
-        maxLines=7
-
+        singleLine = true
         )
 }
 @Composable
@@ -200,7 +199,7 @@ fun EditTextItem(modifier: Modifier=Modifier, desc: String, state: TextFieldStat
             unfocusedIndicatorColor = Color.Transparent
         ),
         textStyle=MaterialTheme.typography.body2,
-        maxLines=7
+        singleLine = true
     )
 }
 @Composable
@@ -504,10 +503,10 @@ fun EditProfileDialog(user: User,onClick: () -> Unit,username: String){
                     .clickable(onClick = {
                         profileVM.updateProfile(
                             UpdateUserRequest(
-                                name = nameState.text,
-                                clubName = clubNameState.text,
-                                ign = ignState.text,
-                                bio = bioState.text
+                                name = if(nameState.text.length > 101)nameState.text.substring(0,100) else nameState.text,
+                                clubName =if(clubNameState.text.length > 101) clubNameState.text.substring(0,100) else clubNameState.text,
+                                ign = if(ignState.text.length > 101) ignState.text.substring(0,100) else ignState.text,
+                                bio = if(bioState.text.length > 501) bioState.text.substring(0,500) else bioState.text
                             ), username
                         )
                         openEdit = false
@@ -692,12 +691,12 @@ fun AddTradingDialog(trading: Trading? ){
                                     addVM.saveTrading(
                                         Trading(
                                             _id = trading?._id.toString(),
-                                            title = titleState.text,
-                                            desc = descState.text,
-                                            itemBuying = itemBuyingState.text,
-                                            amountBuying = amountBuyingState.text,
-                                            itemSelling = itemSellingState.text,
-                                            amountSelling = amountSellingState.text
+                                            title = if(titleState.text.length > 51)titleState.text.substring(0,50) else titleState.text,
+                                            desc = if(descState.text.length > 101)descState.text.substring(0,100) else descState.text,
+                                            itemBuying = if(itemBuyingState.text.length > 101)itemBuyingState.text.substring(0,100) else itemBuyingState.text,
+                                            amountBuying = if(amountBuyingState.text.length > 51) amountBuyingState.text.substring(0,50) else amountBuyingState.text,
+                                            itemSelling = if(itemSellingState.text.length > 101) itemSellingState.text.substring(0,100) else itemSellingState.text,
+                                            amountSelling = if(amountSellingState.text.length > 51)amountSellingState.text.substring(0,50) else amountSellingState.text
                                         )
                                     )
                                     openDialog = false
@@ -1037,7 +1036,7 @@ fun TermTextItem(title:String,desc:String){
         Modifier
             .fillMaxWidth()
             .padding(6.dp)) {
-        Text(title,style=MaterialTheme.typography.button,color = MaterialTheme.colors.onBackground)
+        Text(title,style=MaterialTheme.typography.subtitle1,color = MaterialTheme.colors.onBackground)
         Text(desc,style=MaterialTheme.typography.body1,textAlign= TextAlign.Justify,color=MaterialTheme.colors.onBackground)
         Spacer(modifier = Modifier.padding(6.dp))
     }

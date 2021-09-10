@@ -136,7 +136,7 @@ fun ChatScreen(navController:NavHostController) {
                             top.linkTo(parent.top)
                             end.linkTo(parent.end)
                         }
-                        .padding(2.dp)
+                        .padding(0.dp)
                 )
                 Column(
                     Modifier
@@ -163,7 +163,7 @@ fun ChatScreen(navController:NavHostController) {
                     backgroundColor = MaterialTheme.colors.background
                 ) {
                     Row(
-                        Modifier.fillMaxWidth(),
+                        Modifier.fillMaxWidth().padding(3.dp),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -196,7 +196,7 @@ fun ChatScreen(navController:NavHostController) {
                                             homeVM.saveChat(
                                                 Chat(
                                                     username = username,
-                                                    chat = typeState.text,
+                                                    chat = if(typeState.text.length > 101) typeState.text.substring(0,100) else typeState.text,
                                                     type = visibleChat
                                                 )
                                             )

@@ -47,5 +47,5 @@ fun CTFTheme(
     )
 }
 object ThemeState{
-    var darkModeState by mutableStateOf(false)
+    var darkModeState by mutableStateOf(true)
 }
